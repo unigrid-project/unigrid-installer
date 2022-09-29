@@ -326,6 +326,8 @@ DAEMON_DOWNLOAD_SUPER () {
       curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
       RELEASE_ID=$( jq '.[].id' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
       echo "Downloading latest release info from github."
+      echo "Download URL"
+      echo "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
       curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
