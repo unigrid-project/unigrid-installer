@@ -19,7 +19,12 @@ if [[ "${DAEMON_NAME}" ]]
 then
     echo "passed daemon name " ${DAEMON_NAME}
 fi
+ASCII_ART
 
+if [[ "${ASCII_ART}" ]]
+then
+    ${ASCII_ART}
+fi
 
 CHECK_SYSTEM () {
   # Only run if user has sudo.
