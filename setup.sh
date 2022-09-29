@@ -335,7 +335,7 @@ UNIGRID_SETUP_THREAD () {
     then
     return 1 2>/dev/null || exit 1
     fi
-    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}"
+    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
 }
 stty sane 2>/dev/null
 echo "done"
