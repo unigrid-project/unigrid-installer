@@ -32,9 +32,9 @@ fi
 CHECK_SYSTEM () {
   # Only run if user has sudo.
   sudo true >/dev/null 2>&1
-  USRNAME_CURRENT=$( whoami )
+  USER_NAME_CURRENT=$( whoami )
   CAN_SUDO=0
-  CAN_SUDO=$( timeout --foreground --signal=SIGKILL 1s bash -c "sudo -l 2>/dev/null | grep -v '${USRNAME_CURRENT}' | wc -l " )
+  CAN_SUDO=$( timeout --foreground --signal=SIGKILL 1s bash -c "sudo -l 2>/dev/null | grep -v '${USER_NAME_CURRENT}' | wc -l " )
   if [[ ${CAN_SUDO} =~ ${RE} ]] && [[ "${CAN_SUDO}" -gt 2 ]]
   then
     :
@@ -499,8 +499,62 @@ UNIGRID_SETUP_THREAD () {
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
 }
+
+# Setup systemd to start unigrid on restart.
+TIMEOUT='70s'
+STARTLIMITINTERVAL='600s'
+
+OOM_SCORE_ADJUST=$( sudo cat /etc/passwd | wc -l )
+CPU_SHARES=$(( 1024 - OOM_SCORE_ADJUST ))
+STARTUP_CPU_SHARES=$(( 768 - OOM_SCORE_ADJUST  ))
+echo "Creating systemd service for ${DAEMON_NAME}"
+
+GN_TEXT="Creating systemd shutdown service."
+GN_TEXT1="Shutdown service for unigrid"
+
+cat << SYSTEMD_CONF | sudo tee /etc/systemd/system/"${USER_NAME}".service >/dev/null
+[Unit]
+Description=${DAEMON_NAME} for user ${USER_NAME}
+After=network.target
+
+[Service]
+Type=forking
+User=${USER_NAME}
+WorkingDirectory=${USR_HOME}
+#PIDFile=${USR_HOME}/${DIRECTORY}/${DAEMON_BIN}.pid
+ExecStart=${USR_HOME}/.local/bin/${DAEMON_BIN} --daemon -server
+ExecStartPost=/bin/sleep 1
+ExecStop=${USR_HOME}/.local/bin/${CONTROLLER_BIN} stop
+Restart=always
+RestartSec=${TIMEOUT}
+TimeoutStartSec=${TIMEOUT}
+TimeoutStopSec=240s
+StartLimitInterval=${STARTLIMITINTERVAL}
+StartLimitBurst=3
+OOMScoreAdjust=${OOM_SCORE_ADJUST}
+CPUShares=${CPU_SHARES}
+StartupCPUShares=${STARTUP_CPU_SHARES}
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD_CONF
+
+sudo systemctl daemon-reload
+sudo systemctl enable unigrid.service --now
+
+# Use systemctl if it exists.
+SYSTEMD_FULLFILE=$( grep -lrE "ExecStart=${FILENAME}.*-daemon" /etc/systemd/system/ | head -n 1 )
+if [[ ! -z "${SYSTEMD_FULLFILE}" ]]
+then
+    SYSTEMD_FILE=$( basename "${SYSTEMD_FULLFILE}" )
+fi
+if [[ ! -z "${SYSTEMD_FILE}" ]]
+then
+    systemctl start "${SYSTEMD_FILE}"
+    systemctl status "${SYSTEMD_FILE}"
+fi
+
 stty sane 2>/dev/null
-echo "done"
 echo
 sleep 0.1
 # End of setup script.

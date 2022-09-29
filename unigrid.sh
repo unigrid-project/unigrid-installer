@@ -52,7 +52,8 @@ COLLATERAL=3000
 BLOCKTIME=60
 # Multiple on single IP.
 MULTI_IP_MODE=0
-
+# Home directory
+USR_HOME="/home/${USER_NAME}"
 
 ASCII_ART () {
 echo -e "\e[0m"
