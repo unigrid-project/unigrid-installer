@@ -63,12 +63,12 @@ UNIGRID
 
 cd ~/ || exit
 COUNTER=0
-rm -f ~/___mn.sh
-while [[ ! -f ~/___mn.sh ]] || [[ $( grep -Fxc "# End of gridnode setup script." ~/___mn.sh ) -eq 0 ]]
+rm -f ~/___ugd.sh
+while [[ ! -f ~/___ugd.sh ]] || [[ $( grep -Fxc "# End of setup script." ~/___ugd.sh ) -eq 0 ]]
 do
-  rm -f ~/___mn.sh
+  rm -f ~/___ugd.sh
   echo "Downloading Unigrid Setup Script."
-  wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/setup.sh -O ~/___mn.sh
+  wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/setup.sh -O ~/___ugd.sh
   COUNTER=1
   if [[ "${COUNTER}" -gt 3 ]]
   then
@@ -81,13 +81,13 @@ done
 
 (
   sleep 2
-  rm ~/___mn.sh
+  rm ~/___ugd.sh
 ) & disown
 
 (
 # shellcheck disable=SC1091
-# shellcheck source=/root/___mn.sh
-. ~/___mn.sh
+# shellcheck source=/root/___ugd.sh
+. ~/___ugd.sh
 DAEMON_SETUP_THREAD
 )
 # shellcheck source=/root/.bashrc
