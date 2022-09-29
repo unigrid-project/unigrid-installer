@@ -462,23 +462,6 @@ DAEMON_DOWNLOAD_SUPER () {
   fi
 }
 
-DAEMON_DOWNLOAD_EXTRACT () {
-  PROJECT_DIR=${1}
-  DAEMON_BIN=${2}
-  CONTROLLER_BIN=${3}
-  DOWNLOAD_URL=${4}
-  if [ "${PROJECT_DIR}" -eq 0 ]
-  then
-    echo "no project directory supplied"
-  else
-    echo "$# arguments:"
-    for x in "$@"; do
-        new_file=$(wget --content-disposition -nv "$x" 2>&1 |cut -d\" -f2)
-        mediainfo "$new_file"
-    done
-  fi
-}
-
 UNIGRID_SETUP_THREAD () {
     CHECK_SYSTEM
     if [ $? == "1" ]
