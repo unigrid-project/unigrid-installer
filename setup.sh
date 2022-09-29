@@ -15,19 +15,11 @@
 
 stty sane 2>/dev/null
 
-if [[ -z "${DAEMON_NAME}" ]]
+if [[ "${DAEMON_NAME}" ]]
 then
     echo "passed daemon name " ${DAEMON_NAME}
 fi
 
-ASCII_ART () {
-echo -e "\\e[0m"
-clear 2> /dev/null
-cat << "${BIN_BASE_UPPER}"
-${ASCII_ART_TEXT}
-
-${BIN_BASE_UPPER}
-}
 
 CHECK_SYSTEM () {
   # Only run if user has sudo.
@@ -60,7 +52,6 @@ CHECK_SYSTEM () {
 
 UNIGRID_SETUP_THREAD () {
 CHECK_SYSTEM
-ASCII_ART
 if [ $? == "1" ]
 then
   return 1 2>/dev/null || exit 1
