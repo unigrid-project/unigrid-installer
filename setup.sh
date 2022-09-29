@@ -466,13 +466,21 @@ DAEMON_DOWNLOAD_SUPER () {
   fi
 }
 
-UNIGRID_SETUP_THREAD () {
-    CHECK_SYSTEM
-    if [ $? == "1" ]
+MOVE_FILES_SETOWNER () {
+    sudo true >/dev/null 2>&1
+    if ! sudo useradd -m "${USER_NAME}" -s /bin/bash 2>/dev/null
     then
-    return 1 2>/dev/null || exit 1
+        if ! sudo useradd -g "${USER_NAME}" -m "${USER_NAME}" -s /bin/bash 2>/dev/null
+        then
+            echo
+            echo "User ${USER_NAME} exists. Skipping."
+            echo
+        fi
     fi
-    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+
+    sudo usermod -a -G systemd-journal "${USER_NAME}"
+    chsh -s /bin/bash
+
     echo "moving daemon to /home/${USER_NAME}/.local/bin"
     sudo mkdir -p "/home/${USER_NAME}"/.local/bin
     sudo cp "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" "/home/${USER_NAME}"/.local/bin/
@@ -480,6 +488,16 @@ UNIGRID_SETUP_THREAD () {
     sudo cp "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
+}
+
+UNIGRID_SETUP_THREAD () {
+    CHECK_SYSTEM
+    if [ $? == "1" ]
+    then
+    return 1 2>/dev/null || exit 1
+    fi
+    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    MOVE_FILES_SETOWNER
 }
 stty sane 2>/dev/null
 echo "done"
