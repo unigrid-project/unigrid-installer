@@ -326,8 +326,6 @@ DAEMON_DOWNLOAD_SUPER () {
       curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
       RELEASE_ID=$( jq '.[].id' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
       echo "Downloading latest release info from github."
-      echo "Download URL"
-      echo "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
       curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
@@ -416,7 +414,8 @@ DAEMON_DOWNLOAD_SUPER () {
     echo "Removing old files."
     rm -rf /var/unigrid/"${PROJECT_DIR}"/src/
     echo "Downloading latest release from github."
-
+    echo "Download URL"
+    echo "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
     DAEMON_DOWNLOAD_EXTRACT_OUTPUT=$( DAEMON_DOWNLOAD_EXTRACT "${PROJECT_DIR}" "${DAEMON_BIN}" "${CONTROLLER_BIN}" "${DAEMON_DOWNLOAD_URL}" )
     echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}"
   fi
