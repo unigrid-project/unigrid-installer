@@ -311,6 +311,8 @@ DAEMON_DOWNLOAD_SUPER () {
       curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
+    echo "Download links in json from GitHub repo"
+    echo "${LATEST}" | grep -c 'browser_download_url'
     if [[ $( echo "${LATEST}" | grep -c 'browser_download_url' ) -eq 0 ]]
     then
       FILENAME_RELEASES=$( echo "${REPO}-releases" | tr '/' '_' )
