@@ -17,7 +17,7 @@
 # Run this file
 
 ```
-bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/master/unigrid.sh)" ; source ~/.bashrc
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/unigrid.sh)" ; source ~/.bashrc
 ```
 
 '
@@ -68,7 +68,7 @@ while [[ ! -f ~/___mn.sh ]] || [[ $( grep -Fxc "# End of gridnode setup script."
 do
   rm -f ~/___mn.sh
   echo "Downloading Unigrid Setup Script."
-  wget -4qo- raw.githubusercontent.com/unigrid-project/unigrid-installer/master/setup.sh -O ~/___mn.sh
+  wget -4qo- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/setup.sh -O ~/___mn.sh
   COUNTER=1
   if [[ "${COUNTER}" -gt 3 ]]
   then
