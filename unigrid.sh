@@ -88,7 +88,7 @@ done
 # shellcheck disable=SC1091
 # shellcheck source=/root/___ugd.sh
 . ~/___ugd.sh
-DAEMON_SETUP_THREAD
+UNIGRID_SETUP_THREAD
 )
 # shellcheck source=/root/.bashrc
 . ~/.bashrc
