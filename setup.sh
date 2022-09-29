@@ -416,6 +416,10 @@ DAEMON_DOWNLOAD_SUPER () {
     echo "Downloading latest release from github."
     echo "Download URL"
     echo "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
+    echo "PROJECT_DIR" "${PROJECT_DIR}"
+    echo "DAEMON_BIN" "${DAEMON_BIN}"
+    echo "CONTROLLER_BIN" "${CONTROLLER_BIN}"
+    echo "DAEMON_DOWNLOAD_URL" "${DAEMON_DOWNLOAD_URL}"
     DAEMON_DOWNLOAD_EXTRACT_OUTPUT=$( DAEMON_DOWNLOAD_EXTRACT "${PROJECT_DIR}" "${DAEMON_BIN}" "${CONTROLLER_BIN}" "${DAEMON_DOWNLOAD_URL}" )
     echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}"
   fi
