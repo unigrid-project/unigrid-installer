@@ -107,18 +107,18 @@ DAEMON_DOWNLOAD_EXTRACT () {
     BIN_FILENAME=$( basename "${GITHUB_URL}" | tr -d '\r'  )
     echo "URL: ${GITHUB_URL}"
     stty sane 2>/dev/null
-    wget -4 "${GITHUB_URL}" -O /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" -q --show-progress --progress=bar:force 2>&1
+    wget -4 "${GITHUB_URL}" -O /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -q --show-progress --progress=bar:force 2>&1
     sleep 0.6
     echo
-    mkdir -p /var/multi-gridnode-data/"${PROJECT_DIR}"/src
+    mkdir -p /var/unigrid/"${PROJECT_DIR}"/src
     if [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.gz$' ) -eq 1 ]] || [[ $( echo "${BIN_FILENAME}" | grep -c '.tgz$' ) -eq 1 ]]
     then
       echo "Decompressing tar.gz archive."
       if [[ -x "$( command -v pv )" ]]
       then
-        pv "/var/multi-gridnode-data/latest-github-releasese/${BIN_FILENAME}" | tar -xz -C /var/multi-gridnode-data/"${PROJECT_DIR}"/src 2>&1
+        pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xz -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
       else
-       tar -xzf /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" -C /var/multi-gridnode-data/"${PROJECT_DIR}"/src
+       tar -xzf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
       fi
 
     elif [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.xz$' ) -eq 1 ]]
@@ -126,105 +126,105 @@ DAEMON_DOWNLOAD_EXTRACT () {
       echo "Decompressing tar.xz archive."
      if [[ -x "$( command -v pv )" ]]
      then
-       pv "/var/multi-gridnode-data/latest-github-releasese/${BIN_FILENAME}" | tar -xJ -C /var/multi-gridnode-data/"${PROJECT_DIR}"/src 2>&1
+       pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xJ -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
      else
-        tar -xJf /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" -C /var/multi-gridnode-data/"${PROJECT_DIR}"/src
+        tar -xJf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
      fi
 
     elif [[ $( echo "${BIN_FILENAME}" | grep -c '.zip$' ) -eq 1 ]]
     then
       echo "Unzipping file."
-      unzip -o /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" -d /var/multi-gridnode-data/"${PROJECT_DIR}"/src/
+      unzip -o /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -d /var/unigrid/"${PROJECT_DIR}"/src/
 
     elif [[ $( echo "${BIN_FILENAME}" | grep -c '.deb$' ) -eq 1 ]]
     then
       echo "Installing deb package."
-      sudo -n dpkg --install /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}"
+      sudo -n dpkg --install /var/unigrid/latest-github-releasese/"${BIN_FILENAME}"
       echo "Extracting deb package."
-      dpkg -x /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" /var/multi-gridnode-data/"${PROJECT_DIR}"/src/
+      dpkg -x /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
 
     elif [[ $( echo "${BIN_FILENAME}" | grep -c '.gz$' ) -eq 1 ]]
     then
       echo "Decompressing gz archive."
-      mv /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" /var/multi-gridnode-data/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
-      gunzip /var/multi-gridnode-data/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
+      gunzip /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
 
     else
       echo "Copying over."
-      mv /var/multi-gridnode-data/latest-github-releasese/"${BIN_FILENAME}" /var/multi-gridnode-data/"${PROJECT_DIR}"/src/
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
     fi
 
     cd ~/ || return 1 2>/dev/null
-    find /var/multi-gridnode-data/"${PROJECT_DIR}"/src/ -name "$DAEMON_BIN" -size +128k 2>/dev/null
-    find /var/multi-gridnode-data/"${PROJECT_DIR}"/src/ -name "$DAEMON_BIN" -size +128k -exec cp {} /var/multi-gridnode-data/"${PROJECT_DIR}"/src/  \; 2>/dev/null
-    find /var/multi-gridnode-data/"${PROJECT_DIR}"/src/ -name "$CONTROLLER_BIN" -size +128k 2>/dev/null
-    find /var/multi-gridnode-data/"${PROJECT_DIR}"/src/ -name "$CONTROLLER_BIN" -size +128k -exec cp {} /var/multi-gridnode-data/"${PROJECT_DIR}"/src/  \; 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$DAEMON_BIN" -size +128k 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$DAEMON_BIN" -size +128k -exec cp {} /var/unigrid/"${PROJECT_DIR}"/src/  \; 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$CONTROLLER_BIN" -size +128k 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$CONTROLLER_BIN" -size +128k -exec cp {} /var/unigrid/"${PROJECT_DIR}"/src/  \; 2>/dev/null
 
-    if [[ -s "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" ]] && \
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" ]] && \
       [[ "${BIN_FILENAME}" == ${DAEMON_BIN}* ]] && \
-      [[ $( ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" | grep -ciF 'not a dynamic executable' ) -eq 0 ]]
+      [[ $( ldd "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" | grep -ciF 'not a dynamic executable' ) -eq 0 ]]
     then
       echo "Renaming ${BIN_FILENAME} to ${DAEMON_BIN}"
-      mv "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}"
+      mv "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}"
     fi
-    if [[ -s "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" ]] && \
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" ]] && \
       [[ "${BIN_FILENAME}" == ${CONTROLLER_BIN}* ]] && \
-      [[ $( ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" | grep -ciF 'not a dynamic executable' ) -eq 0 ]]
+      [[ $( ldd "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" | grep -ciF 'not a dynamic executable' ) -eq 0 ]]
     then
       echo "Renaming ${BIN_FILENAME} to ${CONTROLLER_BIN}"
-      mv "/var/multi-gridnode-data/${PROJECT_DIR}/src/${BIN_FILENAME}" "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
+      mv "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
     fi
 
-    if [[ -s "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" ]]
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" ]]
     then
       echo "Setting executable bit for daemon ${DAEMON_BIN}"
-      echo "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}"
-      sudo -n chmod +x "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" 2>/dev/null
-      chmod +x "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" 2>/dev/null
-      if [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" | wc -l ) -gt 2 ]]
+      echo "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}"
+      sudo -n chmod +x "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" 2>/dev/null
+      chmod +x "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" 2>/dev/null
+      if [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" | wc -l ) -gt 2 ]]
       then
         if [[ "${UBUNTU_VERSION}" == 16.* ]] && \
-          [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
+          [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
         then
           echo "ldd has wrong libboost version 1.65"
-          rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}"
-        elif [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
+          rm "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}"
+        elif [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
         then
           echo "ldd has wrong libboost version 1.54"
-          rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}"
+          rm "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}"
         else
           echo "Good"
           FOUND_DAEMON=1
         fi
       else
         echo "ldd failed."
-        rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${DAEMON_BIN}"
+        rm "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}"
       fi
     fi
-    if [[ -s "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" ]]
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" ]]
     then
       echo "Setting executable bit for controller ${CONTROLLER_BIN}"
-      echo "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
-      sudo -n chmod +x "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" 2>/dev/null
-      chmod +x "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" 2>/dev/null
-      if [[ $( timeout --signal=SIGKILL 1s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | wc -l ) -gt 2 ]]
+      echo "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
+      sudo -n chmod +x "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" 2>/dev/null
+      chmod +x "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" 2>/dev/null
+      if [[ $( timeout --signal=SIGKILL 1s ldd "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | wc -l ) -gt 2 ]]
       then
         if [[ "${UBUNTU_VERSION}" == 16.* ]] && \
-          [[ $( timeout --signal=SIGKILL 1s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
+          [[ $( timeout --signal=SIGKILL 1s ldd "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
         then
           echo "ldd has wrong libboost version 1.65"
-          rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
-        elif [[ $( timeout --signal=SIGKILL 1s ldd "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
+          rm "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
+        elif [[ $( timeout --signal=SIGKILL 1s ldd "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
         then
           echo "ldd has wrong libboost version 1.54"
-          rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
+          rm "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
         else
           echo "Good"
           FOUND_CLI=1
         fi
       else
         echo "ldd failed."
-        rm "/var/multi-gridnode-data/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
+        rm "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}"
       fi
     fi
 
