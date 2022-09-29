@@ -104,7 +104,8 @@ DAEMON_DOWNLOAD_SUPER () {
       xz-utils \
       jq \
       bc \
-      html-xml-utils
+      html-xml-utils \
+      mediainfo
   fi
 
   REPO=${1}
