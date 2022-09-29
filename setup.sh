@@ -473,6 +473,13 @@ UNIGRID_SETUP_THREAD () {
     return 1 2>/dev/null || exit 1
     fi
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    echo "moving daemon to /home/${USER_NAME}/.local/bin"
+    sudo mkdir -p "${USER_HOME_DIR}"/.local/bin
+    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" "${USER_HOME_DIR}"/.local/bin/
+    sudo chmod +x "${USER_HOME_DIR}"/.local/bin/"${DAEMON_BIN}"
+    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" "${USER_HOME_DIR}"/.local/bin/
+    sudo chmod +x "${USER_HOME_DIR}"/.local/bin/"${CONTROLLER_BIN}"
+    sudo chown -R "${USER_NAME}":"${USER_NAME}" "${USER_HOME_DIR}"
 }
 stty sane 2>/dev/null
 echo "done"

@@ -26,6 +26,8 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-ins
 INSTALLER_REPO='unigrid-project/unigrid-installer'
 DAEMON_REPO='unigrid-project/daemon'
 HEDGEHOD_REPO=''
+# Set username
+USER_NAME='unigrid'
 # Display Name.
 DAEMON_NAME='UNIGRID'
 # Coin Ticker.
