@@ -23,13 +23,17 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-ins
 '
 
 # Github user and project.
-GITHUB_REPO='unigrid-project/unigrid-installer'
+INSTALLER_REPO='unigrid-project/unigrid-installer'
+DAEMON_REPO='unigrid-project/daemon'
+HEDGEHOD_REPO=''
 # Display Name.
 DAEMON_NAME='UNIGRID'
 # Coin Ticker.
 TICKER='UGD'
 # Binary base name.
 BIN_BASE='unigrid'
+# Direct Daemon Download if github has no releases.
+DAEMON_DOWNLOAD=''
 # Directory.
 DIRECTORY='.unigrid'
 # Conf File.
