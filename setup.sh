@@ -826,14 +826,15 @@ MOVE_FILES_SETOWNER () {
 
     sudo usermod -a -G systemd-journal "${USER_NAME}"
     chsh -s /bin/bash
-
+    DAEMON_DIR='unigrid-project_daemon'
+    GROUNDHOG_DIR='unigrid-project_groundhog'
     echo "moving daemon to /home/${USER_NAME}/.local/bin"
     sudo mkdir -p "/home/${USER_NAME}"/.local/bin
-    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${DAEMON_BIN}" "/home/${USER_NAME}"/.local/bin/
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${DAEMON_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${DAEMON_BIN}"
-    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
-    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/
+    sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${GROUNDHOG_BIN}"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
 }
