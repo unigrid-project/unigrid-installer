@@ -300,7 +300,7 @@ JAR_DOWNLOAD_EXTRACT () {
 
     else
       echo "Copying over."
-      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/"${GROUNDHOG_BIN}"
     fi
 
     cd ~/ || return 1 2>/dev/null
