@@ -296,6 +296,7 @@ DAEMON_DOWNLOAD_SUPER () {
     [ ! -x "$( command -v curl )" ] || \
     [ ! -x "$( command -v gzip )" ] || \
     [ ! -x "$( command -v tar )" ] || \
+    [ ! -x "$( command -v java )" ] || \
     [ ! -x "$( command -v unzip )" ]
   then
     WAIT_FOR_APT_GET
@@ -307,7 +308,7 @@ DAEMON_DOWNLOAD_SUPER () {
       jq \
       bc \
       html-xml-utils \
-      mediainfo
+      openjdk-17-jdk
   fi
 
   REPO=${1}
@@ -862,7 +863,8 @@ UNIGRID_SETUP_THREAD () {
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
-    INSTALL_JAVA "${JAVA_URL_LINK}"
+    # use apt-get
+    #INSTALL_JAVA "${JAVA_URL_LINK}"
     SETUP_SYSTEMCTL
 }
 
