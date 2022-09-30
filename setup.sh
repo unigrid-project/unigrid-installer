@@ -781,8 +781,9 @@ MOVE_FILES_SETOWNER () {
 
 SETUP_SYSTEMCTL () {
 # Setup systemd to start unigrid on restart.
-TIMEOUT='70s'
+TIMEOUT='3min'
 STARTLIMITINTERVAL='600s'
+RESTART_TIME='30s'
 
 OOM_SCORE_ADJUST=$( sudo cat /etc/passwd | wc -l )
 CPU_SHARES=$(( 1024 - OOM_SCORE_ADJUST ))
@@ -806,11 +807,12 @@ ExecStart=java -jar ${USR_HOME}/.local/bin/groundhog.jar start
 ExecStartPost=/bin/sleep 1
 ExecStop=/bin/kill -15 $MAINPID
 Restart=always
-RestartSec=${TIMEOUT}
+RestartSec=${RESTART_TIME}
 TimeoutStartSec=${TIMEOUT}
-TimeoutStopSec=240s
+TimeoutStopSec=infinity
+TimeoutStopSec=${TIMEOUT}
 StartLimitInterval=${STARTLIMITINTERVAL}
-StartLimitBurst=3
+StartLimitBurst=5
 OOMScoreAdjust=${OOM_SCORE_ADJUST}
 CPUShares=${CPU_SHARES}
 StartupCPUShares=${STARTUP_CPU_SHARES}
