@@ -779,6 +779,21 @@ MOVE_FILES_SETOWNER () {
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
 }
 
+INSTALL_JAVA () {
+    JAVA_URL=${1}
+    JAVA_FILENAME=$( basename "${JAVA_URL}" | tr -d '\r'  )
+    stty sane 2>/dev/null
+    wget -4 "${JAVA_URL}" -O /var/unigrid/latest-github-releasese/"${JAVA_FILENAME}" -q --show-progress --progress=bar:force 2>&1
+
+    if [[ $( echo "${JAVA_FILENAME}" | grep -c '.deb$' ) -eq 1 ]]
+    then
+      echo "Installing java"
+      sudo dpkg -i /var/unigrid/latest-github-releasese/"${JAVA_FILENAME}"
+      echo "Extracting Java deb package."
+      echo java -version
+    fi
+}
+
 SETUP_SYSTEMCTL () {
 # Setup systemd to start unigrid on restart.
 TIMEOUT='1min'
@@ -846,6 +861,7 @@ UNIGRID_SETUP_THREAD () {
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
+    INSTALL_JAVA "${JAVA_URL_LINK}"
     SETUP_SYSTEMCTL
 }
 
