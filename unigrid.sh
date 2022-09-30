@@ -39,7 +39,7 @@ GROUNDHOG_BASE='groundhog.jar'
 # Direct Daemon Download if github has no releases.
 DAEMON_DOWNLOAD=''
 # Direct groundhog Download if github has no releases.
-GROUNDHOG_DOWNLOAD=''
+GROUNDHOG_DOWNLOAD='https://github.com/unigrid-project/groundhog/releases/download/v0.0.1/groundhog-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
 # Directory.
 DIRECTORY='.unigrid'
 # Conf File.
