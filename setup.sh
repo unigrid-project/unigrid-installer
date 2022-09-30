@@ -774,8 +774,8 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${DAEMON_BIN}"
     sudo cp "/var/unigrid/${DAEMON_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
-    sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/
-    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${GROUNDHOG_BIN}"
+    sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
+    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
 }
 
