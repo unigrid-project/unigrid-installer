@@ -279,27 +279,8 @@ JAR_DOWNLOAD_EXTRACT () {
     then
       echo "Setting executable bit for daemon ${JAR_BIN}"
       echo "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
-      sudo -n chmod +x "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" 2>/dev/null
-      chmod +x "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" 2>/dev/null
-      if [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | wc -l ) -gt 2 ]]
-      then
-        if [[ "${UBUNTU_VERSION}" == 16.* ]] && \
-          [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
-        then
-          echo "ldd has wrong libboost version 1.65"
-          rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
-        elif [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
-        then
-          echo "ldd has wrong libboost version 1.54"
-          rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
-        else
-          echo "Good"
-          FOUND_JAR=1
-        fi
-      else
-        echo "ldd failed."
-        rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
-      fi
+      echo "Good"
+      FOUND_JAR=1
     fi
 
     # Break out of loop if we got what we needed.
