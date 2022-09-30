@@ -778,6 +778,8 @@ MOVE_FILES_SETOWNER () {
     sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
+    export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
+    echo PATH
 }
 
 INSTALL_JAVA () {
