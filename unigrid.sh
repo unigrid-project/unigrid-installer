@@ -26,7 +26,7 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-ins
 INSTALLER_REPO='unigrid-project/unigrid-installer'
 DAEMON_REPO='unigrid-project/daemon'
 HEDGEHOD_REPO=''
-GROUNDHOG_REPO=''
+GROUNDHOG_REPO='unigrid-project/groundhog'
 # Set username
 USER_NAME='unigrid'
 # Display Name.
