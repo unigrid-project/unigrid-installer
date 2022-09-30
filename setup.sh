@@ -831,7 +831,7 @@ fi
 if [[ ! -z "${SYSTEMD_FILE}" ]]
 then
     systemctl start "${SYSTEMD_FILE}"
-    echo systemctl status "${SYSTEMD_FILE}"
+    echo started "${SYSTEMD_FILE}"
 fi
 
 }
