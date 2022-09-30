@@ -492,16 +492,7 @@ MOVE_FILES_SETOWNER () {
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
 }
 
-UNIGRID_SETUP_THREAD () {
-    CHECK_SYSTEM
-    if [ $? == "1" ]
-    then
-    return 1 2>/dev/null || exit 1
-    fi
-    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
-    MOVE_FILES_SETOWNER
-}
-
+SETUP_SYSTEMCTL () {
 # Setup systemd to start unigrid on restart.
 TIMEOUT='70s'
 STARTLIMITINTERVAL='600s'
@@ -555,6 +546,21 @@ then
     systemctl start "${SYSTEMD_FILE}"
     echo systemctl status "${SYSTEMD_FILE}"
 fi
+
+}
+
+UNIGRID_SETUP_THREAD () {
+    CHECK_SYSTEM
+    if [ $? == "1" ]
+    then
+    return 1 2>/dev/null || exit 1
+    fi
+    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    MOVE_FILES_SETOWNER
+    SETUP_SYSTEMCTL
+}
+
+
 
 stty sane 2>/dev/null
 echo
