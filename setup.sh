@@ -781,8 +781,8 @@ MOVE_FILES_SETOWNER () {
 
 SETUP_SYSTEMCTL () {
 # Setup systemd to start unigrid on restart.
-TIMEOUT='3min'
-STARTLIMITINTERVAL='600s'
+TIMEOUT='1min'
+STARTLIMITINTERVAL='200s'
 RESTART_TIME='30s'
 
 OOM_SCORE_ADJUST=$( sudo cat /etc/passwd | wc -l )
@@ -799,7 +799,7 @@ Description=${DAEMON_NAME} for user ${USER_NAME}
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=${USER_NAME}
 WorkingDirectory=${USR_HOME}
 #PIDFile=${USR_HOME}/${DIRECTORY}/${DAEMON_BIN}.pid
