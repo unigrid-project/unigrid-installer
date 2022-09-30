@@ -27,6 +27,8 @@ INSTALLER_REPO='unigrid-project/unigrid-installer'
 DAEMON_REPO='unigrid-project/daemon'
 HEDGEHOD_REPO=''
 GROUNDHOG_REPO='unigrid-project/groundhog'
+# GitHub Auth Token
+AUTH_TOKEN='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'
 # Set username
 USER_NAME='unigrid'
 # Display Name.

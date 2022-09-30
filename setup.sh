@@ -416,13 +416,24 @@ DAEMON_DOWNLOAD_SUPER () {
       TIMESTAMP=$( stat -c %Y "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
     echo "Downloading ${RELEASE_TAG} release info from github."
-    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+    #curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+    curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
 
     LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     if [[ $( echo "${LATEST}" | grep -c 'browser_download_url' ) -eq 0 ]]
     then
       echo "Downloading ${RELEASE_TAG} release info from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
     echo "Download links in json from GitHub repo"
@@ -437,10 +448,22 @@ DAEMON_DOWNLOAD_SUPER () {
         TIMESTAMP_RELEASES=$( stat -c %Y /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json )
       fi
       echo "Downloading all releases from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
       RELEASE_ID=$( jq '.[].id' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
       echo "Downloading latest release info from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
 
@@ -553,7 +576,15 @@ DAEMON_DOWNLOAD_SUPER () {
     fi
     echo "Downloading all releases from github."
     rm -rf /var/unigrid/"${PROJECT_DIR}"/src/
-    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+    curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases"  \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+
+
+    # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
 
     DAEMON_DOWNLOAD_URL_ALL=$( jq -r '.[].assets[].browser_download_url' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
     DAEMON_DOWNLOAD_URL_ALL_BODY=$( jq -r '.[].body' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
@@ -618,13 +649,26 @@ GROUNDHOG_DOWNLOAD_SUPER () {
       TIMESTAMP=$( stat -c %Y "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
     echo "Downloading ${RELEASE_TAG} release info from github."
-    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+    curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+
+    # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
 
     LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     if [[ $( echo "${LATEST}" | grep -c 'browser_download_url' ) -eq 0 ]]
     then
       echo "Downloading ${RELEASE_TAG} release info from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}"  \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
     echo "Download links in json from GitHub repo"
@@ -639,10 +683,23 @@ GROUNDHOG_DOWNLOAD_SUPER () {
         TIMESTAMP_RELEASES=$( stat -c %Y /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json )
       fi
       echo "Downloading all releases from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
       RELEASE_ID=$( jq '.[].id' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
       echo "Downloading latest release info from github."
-      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+
+      # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
       LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
     fi
 
@@ -721,7 +778,14 @@ GROUNDHOG_DOWNLOAD_SUPER () {
     fi
     echo "Downloading all releases from github."
     rm -rf /var/unigrid/"${PROJECT_DIR}"/src/
-    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+    curl \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${AUTH_TOKEN}" \
+        -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases"  \
+        -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" \
+        -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+
+    # curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
 
     GROUNDHOG_DOWNLOAD_URL_ALL=$( jq -r '.[].assets[].browser_download_url' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
     GROUNDHOG_DOWNLOAD_URL_ALL_BODY=$( jq -r '.[].body' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
