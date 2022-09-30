@@ -300,7 +300,7 @@ JAR_DOWNLOAD_EXTRACT () {
 
     else
       echo "Copying over."
-      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/"${GROUNDHOG_BIN}"
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
     fi
 
     cd ~/ || return 1 2>/dev/null
@@ -837,9 +837,9 @@ UNIGRID_SETUP_THREAD () {
     then
     return 1 2>/dev/null || exit 1
     fi
-    #DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
-    #MOVE_FILES_SETOWNER
+    MOVE_FILES_SETOWNER
     #SETUP_SYSTEMCTL
 }
 
