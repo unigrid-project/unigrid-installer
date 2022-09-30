@@ -19,6 +19,8 @@ stty sane 2>/dev/null
 SP="/-\\|"
 DAEMON_BIN=''
 CONTROLLER_BIN=''
+GROUNDHOG_BIN=''
+HEDGEHOD_BIN=''
 
 if [[ "${DAEMON_NAME}" ]]
 then
@@ -468,6 +470,173 @@ DAEMON_DOWNLOAD_SUPER () {
   fi
 }
 
+GROUNDHOG_DOWNLOAD_SUPER () {
+  REPO=${1}
+  BIN_BASE=${2}
+  GROUNDHOG_DOWNLOAD_URL=${3}
+  FILENAME=$( echo "${REPO}" | tr '/' '_' )
+  RELEASE_TAG='latest'
+  if [[ ! -z "${4}" ]] && [[ "${4}" != 'force' ]] && [[ "${4}" != 'force_skip_download' ]]
+  then
+    rm "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+    RELEASE_TAG=${4}
+  fi
+
+  if [[ -z "${REPO}" ]] || [[ -z "${BIN_BASE}" ]]
+  then
+    return 1 2>/dev/null
+  fi
+  echo "Checking ${REPO} for the latest version"
+
+  PROJECT_DIR=$( echo "${REPO}" | tr '/' '_' )
+
+  GROUNDHOG_BIN="${BIN_BASE}"
+  DAEMON_GREP="[${GROUNDHOG_BIN:0:1}]${GROUNDHOG_BIN:1}"
+
+  if [[ ! "${GROUNDHOG_DOWNLOAD_URL}" == http* ]]
+  then
+    GROUNDHOG_DOWNLOAD_URL=''
+  fi
+
+  # curl & curl cache.
+  if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]]
+  then
+    TIMESTAMP=9999
+    if [[ -s "/var/unigrid/latest-github-releasese/${FILENAME}.json" ]]
+    then
+      # Get timestamp.
+      TIMESTAMP=$( stat -c %Y "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
+    fi
+    echo "Downloading ${RELEASE_TAG} release info from github."
+    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -z "$( date --rfc-2822 -d "@${TIMESTAMP}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+
+    LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
+    if [[ $( echo "${LATEST}" | grep -c 'browser_download_url' ) -eq 0 ]]
+    then
+      echo "Downloading ${RELEASE_TAG} release info from github."
+      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_TAG}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
+    fi
+    echo "Download links in json from GitHub repo"
+    echo "${LATEST}" | grep -c 'browser_download_url'
+    if [[ $( echo "${LATEST}" | grep -c 'browser_download_url' ) -eq 0 ]]
+    then
+      FILENAME_RELEASES=$( echo "${REPO}-releases" | tr '/' '_' )
+      TIMESTAMP_RELEASES=9999
+      if [[ -s /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json ]]
+      then
+        # Get timestamp.
+        TIMESTAMP_RELEASES=$( stat -c %Y /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json )
+      fi
+      echo "Downloading all releases from github."
+      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+      RELEASE_ID=$( jq '.[].id' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
+      echo "Downloading latest release info from github."
+      curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}" -o "/var/unigrid/latest-github-releasese/${FILENAME}.json"
+      LATEST=$( cat "/var/unigrid/latest-github-releasese/${FILENAME}.json" )
+    fi
+
+    VERSION_REMOTE=$( echo "${LATEST}" | jq -r '.tag_name' | sed 's/[^0-9.]*\([0-9.]*\).*/\1/' )
+    echo "Remote version: ${VERSION_REMOTE}"
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]] && \
+      [[ $( echo "${GROUNDHOG_BIN}" | grep -cE "jar$" ) -gt 0 ]]
+    then
+      # Set executable bit.
+      if [[ ${CAN_SUDO} =~ ${RE} ]] && [[ "${CAN_SUDO}" -gt 2 ]]
+      then
+        sudo chmod +x "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}"
+      else
+        chmod +x "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}"
+      fi
+
+      VERSION_LOCAL=$( timeout --signal=SIGKILL 9s "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" --help 2>/dev/null | head -n 1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/' )
+      if [[ -z "${VERSION_LOCAL}" ]]
+      then
+        VERSION_LOCAL=$( timeout --signal=SIGKILL 9s "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" -version 2>/dev/null | sed 's/[^0-9.]*\([0-9.]*\).*/\1/' )
+      fi
+
+      echo "Local version: ${VERSION_LOCAL}"
+      if [[ $( echo "${VERSION_LOCAL}" | grep -c "${VERSION_REMOTE}" ) -eq 1 ]] && [[ "${4}" != 'force' ]]
+      then
+        return 1 2>/dev/null
+      fi
+    fi
+
+    ALL_DOWNLOADS=$( echo "${LATEST}" | jq -r '.assets[].browser_download_url' )
+    # Remove useless files.
+    # not really necessary for the jars TODO
+    DOWNLOADS=$( echo "${ALL_DOWNLOADS}" | grep -iv 'win' | grep -iv 'arm-RPi' | grep -iv '\-qt' | grep -iv 'raspbian' | grep -v '.dmg$' | grep -v '.exe$' | grep -v '.sh$' | grep -v '.pdf$' | grep -v '.sig$' | grep -v '.asc$' | grep -iv 'MacOS' | grep -iv 'OSX' | grep -iv 'HighSierra' | grep -iv 'arm' | grep -iv 'bootstrap' | grep -iv '14.04' )
+
+    # Try to pick the correct file.
+    LINES=$( echo "${DOWNLOADS}" | sed '/^[[:space:]]*$/d' | wc -l )
+    if [[ "${LINES}" -eq 0 ]]
+    then
+      echo "ERROR! Will try all files below."
+    elif [[ "${LINES}" -eq 1 ]]
+    then
+      GROUNDHOG_DOWNLOAD_URL="${DOWNLOADS}"
+    fi
+
+  fi
+  if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]]
+  then
+    echo
+    echo "Could not find groundhog from https://api.github.com/repos/${REPO}/releases/latest"
+    echo "${DOWNLOADS}"
+    echo
+  else
+    echo "Removing old files."
+    rm -rf /var/unigrid/"${PROJECT_DIR}"/src/
+    echo "Downloading latest release from github."
+    echo "Download URL"
+    echo "https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
+    echo "PROJECT_DIR" "${PROJECT_DIR}"
+    echo "GROUNDHOG_BIN" "${GROUNDHOG_BIN}"
+    echo "GROUNDHOG_DOWNLOAD_URL" "${GROUNDHOG_DOWNLOAD_URL}"
+    DAEMON_DOWNLOAD_EXTRACT_OUTPUT="groundhog-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
+    echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}"
+  fi
+
+  if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]] || \
+    [[ ! -f "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]] || \
+    [[ $( echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}" | grep -c "executable bit for controller" ) -eq 0 ]]
+  then
+    FILENAME_RELEASES=$( echo "${REPO}-releases" | tr '/' '_' )
+    TIMESTAMP_RELEASES=9999
+    if [[ -s /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json ]]
+    then
+      # Get timestamp.
+      TIMESTAMP_RELEASES=$( stat -c %Y /var/unigrid/latest-github-releasese/"${FILENAME_RELEASES}".json )
+    fi
+    echo "Downloading all releases from github."
+    rm -rf /var/unigrid/"${PROJECT_DIR}"/src/
+    curl -sL --max-time 10 "https://api.github.com/repos/${REPO}/releases" -z "$( date --rfc-2822 -d "@${TIMESTAMP_RELEASES}" )" -o "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json"
+
+    GROUNDHOG_DOWNLOAD_URL_ALL=$( jq -r '.[].assets[].browser_download_url' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
+    GROUNDHOG_DOWNLOAD_URL_ALL_BODY=$( jq -r '.[].body' < "/var/unigrid/latest-github-releasese/${FILENAME_RELEASES}.json" )
+    GROUNDHOG_DOWNLOAD_URL_ALL_BODY=$( echo "${GROUNDHOG_DOWNLOAD_URL_ALL_BODY}" | grep -Eo '(https?://[^ ]+)' | tr -d ')' | tr -d '(' | tr -d '\r' )
+    GROUNDHOG_DOWNLOAD_URL=$( echo "${GROUNDHOG_DOWNLOAD_URL_ALL}" | grep -iv 'win' | grep -iv 'arm-RPi' | grep -iv '\-qt' | grep -iv 'raspbian' | grep -v '.dmg$' | grep -v '.exe$' | grep -v '.sh$' | grep -v '.pdf$' | grep -v '.sig$' | grep -v '.asc$' | grep -iv 'MacOS' | grep -iv 'HighSierra' | grep -iv 'arm' )
+    if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]]
+    then
+      GROUNDHOG_DOWNLOAD_URL="${GROUNDHOG_DOWNLOAD_URL_ALL}"
+    fi
+    if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]]
+    then
+      GROUNDHOG_DOWNLOAD_URL="${GROUNDHOG_DOWNLOAD_URL_ALL_BODY}"
+    fi
+
+    #DAEMON_DOWNLOAD_EXTRACT "${PROJECT_DIR}" "${DAEMON_BIN}" "${CONTROLLER_BIN}" "${GROUNDHOG_DOWNLOAD_URL}"
+  fi
+  if [[ ${CAN_SUDO} =~ ${RE} ]] && [[ "${CAN_SUDO}" -gt 2 ]]
+  then
+    sudo -n sh -c "find /var/unigrid/ -type f -exec chmod 666 {} \\;"
+    sudo -n sh -c "find /var/unigrid/ -type d -exec chmod 777 {} \\;"
+  else
+    find "/var/unigrid/" -type f -exec chmod 666 {} \;
+    find "/var/unigrid/" -type d -exec chmod 777 {} \;
+  fi
+}
+
 MOVE_FILES_SETOWNER () {
     sudo true >/dev/null 2>&1
     if ! sudo useradd -m "${USER_NAME}" -s /bin/bash 2>/dev/null
@@ -556,6 +725,7 @@ UNIGRID_SETUP_THREAD () {
     return 1 2>/dev/null || exit 1
     fi
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
     SETUP_SYSTEMCTL
 }
