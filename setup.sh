@@ -707,8 +707,7 @@ GROUNDHOG_DOWNLOAD_SUPER () {
   fi
 
   if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]] || \
-    [[ ! -f "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]] || \
-    [[ $( echo "${GROUNDHOG_DOWNLOAD_EXTRACT_OUTPUT}" | grep -c "executable bit for controller" ) -eq 0 ]]
+    [[ ! -f "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]]
   then
     FILENAME_RELEASES=$( echo "${REPO}-releases" | tr '/' '_' )
     TIMESTAMP_RELEASES=9999
