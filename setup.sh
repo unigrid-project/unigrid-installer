@@ -240,6 +240,116 @@ DAEMON_DOWNLOAD_EXTRACT () {
   done <<< "${DAEMON_DOWNLOAD_URL}"
 }
 
+JAR_DOWNLOAD_EXTRACT () {
+  PROJECT_DIR=${1}
+  JAR_BIN=${2}
+  JAR_DOWNLOAD_URL=${3}
+
+  UBUNTU_VERSION=$( lsb_release -sr )
+  FOUND_JAR=0
+  while read -r GITHUB_URL
+  do
+    if [[ -z "${GITHUB_URL}" ]]
+    then
+      continue
+    fi
+    BIN_FILENAME=$( basename "${GITHUB_URL}" | tr -d '\r'  )
+    echo "URL: ${GITHUB_URL}"
+    stty sane 2>/dev/null
+    wget -4 "${GITHUB_URL}" -O /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -q --show-progress --progress=bar:force 2>&1
+    sleep 0.6
+    echo
+    mkdir -p /var/unigrid/"${PROJECT_DIR}"/src
+    if [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.gz$' ) -eq 1 ]] || [[ $( echo "${BIN_FILENAME}" | grep -c '.tgz$' ) -eq 1 ]]
+    then
+      echo "Decompressing tar.gz archive."
+      if [[ -x "$( command -v pv )" ]]
+      then
+        pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xz -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
+      else
+       tar -xzf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
+      fi
+
+    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.xz$' ) -eq 1 ]]
+    then
+      echo "Decompressing tar.xz archive."
+     if [[ -x "$( command -v pv )" ]]
+     then
+       pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xJ -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
+     else
+        tar -xJf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
+     fi
+
+    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.zip$' ) -eq 1 ]]
+    then
+      echo "Unzipping file."
+      unzip -o /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -d /var/unigrid/"${PROJECT_DIR}"/src/
+
+    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.deb$' ) -eq 1 ]]
+    then
+      echo "Installing deb package."
+      sudo -n dpkg --install /var/unigrid/latest-github-releasese/"${BIN_FILENAME}"
+      echo "Extracting deb package."
+      dpkg -x /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
+
+    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.gz$' ) -eq 1 ]]
+    then
+      echo "Decompressing gz archive."
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
+      gunzip /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
+
+    else
+      echo "Copying over."
+      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
+    fi
+
+    cd ~/ || return 1 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$JAR_BIN" -size +128k 2>/dev/null
+    find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$JAR_BIN" -size +128k -exec cp {} /var/unigrid/"${PROJECT_DIR}"/src/  \; 2>/dev/null
+
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" ]] && \
+      [[ "${BIN_FILENAME}" == ${JAR_BIN}* ]] && \
+      [[ $( ldd "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" | grep -ciF 'not a dynamic executable' ) -eq 0 ]]
+    then
+      echo "Renaming ${BIN_FILENAME} to ${JAR_BIN}"
+      mv "/var/unigrid/${PROJECT_DIR}/src/${BIN_FILENAME}" "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
+    fi
+
+    if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" ]]
+    then
+      echo "Setting executable bit for daemon ${JAR_BIN}"
+      echo "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
+      sudo -n chmod +x "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" 2>/dev/null
+      chmod +x "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" 2>/dev/null
+      if [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | wc -l ) -gt 2 ]]
+      then
+        if [[ "${UBUNTU_VERSION}" == 16.* ]] && \
+          [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | grep -cE 'libboost.*1.65' ) -gt 0 ]]
+        then
+          echo "ldd has wrong libboost version 1.65"
+          rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
+        elif [[ $( timeout --foreground --signal=SIGKILL 3s ldd "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}" | grep -cE 'libboost.*1.54' ) -gt 0 ]]
+        then
+          echo "ldd has wrong libboost version 1.54"
+          rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
+        else
+          echo "Good"
+          FOUND_JAR=1
+        fi
+      else
+        echo "ldd failed."
+        rm "/var/unigrid/${PROJECT_DIR}/src/${JAR_BIN}"
+      fi
+    fi
+
+    # Break out of loop if we got what we needed.
+    if [[ "${FOUND_JAR}" -eq 1 ]]
+    then
+      break
+    fi
+  done <<< "${JAR_DOWNLOAD_URL}"
+}
+
 DAEMON_DOWNLOAD_SUPER () {
   if [ ! -x "$( command -v jq )" ] || \
     [ ! -x "$( command -v curl )" ] || \
@@ -538,6 +648,7 @@ GROUNDHOG_DOWNLOAD_SUPER () {
 
     VERSION_REMOTE=$( echo "${LATEST}" | jq -r '.tag_name' | sed 's/[^0-9.]*\([0-9.]*\).*/\1/' )
     echo "Remote version: ${VERSION_REMOTE}"
+    echo "JAR: ${GROUNDHOG_BIN}" | grep -cE "jar$" 
     if [[ -s "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]] && \
       [[ $( echo "${GROUNDHOG_BIN}" | grep -cE "jar$" ) -gt 0 ]]
     then
@@ -593,13 +704,13 @@ GROUNDHOG_DOWNLOAD_SUPER () {
     echo "PROJECT_DIR" "${PROJECT_DIR}"
     echo "GROUNDHOG_BIN" "${GROUNDHOG_BIN}"
     echo "GROUNDHOG_DOWNLOAD_URL" "${GROUNDHOG_DOWNLOAD_URL}"
-    DAEMON_DOWNLOAD_EXTRACT_OUTPUT="groundhog-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
-    echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}"
+    GROUNDHOG_DOWNLOAD_EXTRACT_OUTPUT=$( JAR_DOWNLOAD_EXTRACT "${PROJECT_DIR}" "${GROUNDHOG_BIN}" "${DAEMON_DOWNLOAD_URL}" )
+    echo "${GROUNDHOG_DOWNLOAD_EXTRACT_OUTPUT}"
   fi
 
   if [[ -z "${GROUNDHOG_DOWNLOAD_URL}" ]] || \
     [[ ! -f "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" ]] || \
-    [[ $( echo "${DAEMON_DOWNLOAD_EXTRACT_OUTPUT}" | grep -c "executable bit for controller" ) -eq 0 ]]
+    [[ $( echo "${GROUNDHOG_DOWNLOAD_EXTRACT_OUTPUT}" | grep -c "executable bit for controller" ) -eq 0 ]]
   then
     FILENAME_RELEASES=$( echo "${REPO}-releases" | tr '/' '_' )
     TIMESTAMP_RELEASES=9999
