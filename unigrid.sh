@@ -37,7 +37,7 @@ DAEMON_NAME='UNIGRID'
 TICKER='UGD'
 # Binary base name.
 BIN_BASE='unigrid'
-GROUNDHOG_BASE='groundhog-0.0.1-SNAPSHOT-jar-with-dependencies.jar'
+GROUNDHOG_BASE='groundhog.jar'
 # Direct Daemon Download if github has no releases.
 DAEMON_DOWNLOAD='https://github.com/unigrid-project/daemon/releases/download/v2.9.3/unigrid-2.9.3-x86_64-linux-gnu.tar.gz'
 #DAEMON_DOWNLOAD=''
