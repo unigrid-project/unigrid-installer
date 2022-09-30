@@ -17,6 +17,8 @@ stty sane 2>/dev/null
 
 # Chars for spinner.
 SP="/-\\|"
+DAEMON_BIN=''
+CONTROLLER_BIN=''
 
 if [[ "${DAEMON_NAME}" ]]
 then
