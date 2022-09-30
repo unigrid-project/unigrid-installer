@@ -658,6 +658,8 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${DAEMON_BIN}"
     sudo cp "/var/unigrid/${PROJECT_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
+    sudo cp "/var/unigrid/${PROJECT_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/
+    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${GROUNDHOG_BIN}"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
 }
 
@@ -724,9 +726,9 @@ UNIGRID_SETUP_THREAD () {
     then
     return 1 2>/dev/null || exit 1
     fi
-    #DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
+    DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
-    #MOVE_FILES_SETOWNER
+    MOVE_FILES_SETOWNER
     #SETUP_SYSTEMCTL
 }
 
