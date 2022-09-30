@@ -260,48 +260,8 @@ JAR_DOWNLOAD_EXTRACT () {
     sleep 0.6
     echo
     mkdir -p /var/unigrid/"${PROJECT_DIR}"/src
-    if [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.gz$' ) -eq 1 ]] || [[ $( echo "${BIN_FILENAME}" | grep -c '.tgz$' ) -eq 1 ]]
-    then
-      echo "Decompressing tar.gz archive."
-      if [[ -x "$( command -v pv )" ]]
-      then
-        pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xz -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
-      else
-       tar -xzf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
-      fi
-
-    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.tar.xz$' ) -eq 1 ]]
-    then
-      echo "Decompressing tar.xz archive."
-     if [[ -x "$( command -v pv )" ]]
-     then
-       pv "/var/unigrid/latest-github-releasese/${BIN_FILENAME}" | tar -xJ -C /var/unigrid/"${PROJECT_DIR}"/src 2>&1
-     else
-        tar -xJf /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -C /var/unigrid/"${PROJECT_DIR}"/src
-     fi
-
-    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.zip$' ) -eq 1 ]]
-    then
-      echo "Unzipping file."
-      unzip -o /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -d /var/unigrid/"${PROJECT_DIR}"/src/
-
-    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.deb$' ) -eq 1 ]]
-    then
-      echo "Installing deb package."
-      sudo -n dpkg --install /var/unigrid/latest-github-releasese/"${BIN_FILENAME}"
-      echo "Extracting deb package."
-      dpkg -x /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
-
-    elif [[ $( echo "${BIN_FILENAME}" | grep -c '.gz$' ) -eq 1 ]]
-    then
-      echo "Decompressing gz archive."
-      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
-      gunzip /var/unigrid/"${PROJECT_DIR}"/src/"${BIN_FILENAME}"
-
-    else
-      echo "Copying over."
-      mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
-    fi
+    echo "Copying over ${BIN_FILENAME}."
+    mv /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" /var/unigrid/"${PROJECT_DIR}"/src/
 
     cd ~/ || return 1 2>/dev/null
     find /var/unigrid/"${PROJECT_DIR}"/src/ -name "$JAR_BIN" -size +128k 2>/dev/null
