@@ -247,16 +247,16 @@ JAR_DOWNLOAD_EXTRACT () {
 
   UBUNTU_VERSION=$( lsb_release -sr )
   FOUND_JAR=0
-  while read -r GITHUB_URL
+  while read -r GITHUB_URL_JAR
   do
-    if [[ -z "${GITHUB_URL}" ]]
+    if [[ -z "${GITHUB_URL_JAR}" ]]
     then
       continue
     fi
-    BIN_FILENAME=$( basename "${GITHUB_URL}" | tr -d '\r'  )
-    echo "URL: ${GITHUB_URL}"
+    BIN_FILENAME=$( basename "${GITHUB_URL_JAR}" | tr -d '\r'  )
+    echo "URL: ${GITHUB_URL_JAR}"
     stty sane 2>/dev/null
-    wget -4 "${GITHUB_URL}" -O /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -q --show-progress --progress=bar:force 2>&1
+    wget -4 "${GITHUB_URL_JAR}" -O /var/unigrid/latest-github-releasese/"${BIN_FILENAME}" -q --show-progress --progress=bar:force 2>&1
     sleep 0.6
     echo
     mkdir -p /var/unigrid/"${PROJECT_DIR}"/src
