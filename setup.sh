@@ -784,13 +784,14 @@ INSTALL_JAVA () {
     JAVA_FILENAME=$( basename "${JAVA_URL}" | tr -d '\r'  )
     stty sane 2>/dev/null
     wget -4 "${JAVA_URL}" -O /var/unigrid/latest-github-releasese/"${JAVA_FILENAME}" -q --show-progress --progress=bar:force 2>&1
-
+    echo "Downloaded ${JAVA_FILENAME}"
     if [[ $( echo "${JAVA_FILENAME}" | grep -c '.deb$' ) -eq 1 ]]
     then
+      WAIT_FOR_APT_GET
       echo "Installing java"
-      sudo dpkg -i /var/unigrid/latest-github-releasese/"${JAVA_FILENAME}"
+      sudo -n dpkg -i /var/unigrid/latest-github-releasese/"${JAVA_FILENAME}"
       echo "Extracting Java deb package."
-      echo java -version
+      echo "$( java -version ) " 
     fi
 }
 
