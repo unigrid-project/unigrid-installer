@@ -831,9 +831,8 @@ fi
 if [[ ! -z "${SYSTEMD_FILE}" ]]
 then
     systemctl start "${SYSTEMD_FILE}"
-    echo "started ${SYSTEMD_FILE}"
 fi
-
+echo "service started"
 }
 
 UNIGRID_SETUP_THREAD () {
