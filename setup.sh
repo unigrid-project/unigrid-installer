@@ -853,7 +853,27 @@ if [[ ! -z "${SYSTEMD_FILE}" ]]
 then
     systemctl start "${SYSTEMD_FILE}"
 fi
-echo "service started"
+stty sane 2>/dev/null
+echo "groundhog started"
+
+ASCII_ART_GROUNDHOG
+
+if [[ "${ASCII_ART_GROUNDHOG}" ]]
+then
+    ${ASCII_ART_GROUNDHOG}
+fi
+}
+
+CREATE_COMMAND_SCRIPT () {
+  cat << "UNIGRID_COMMANDS" > "/home/${USER_NAME}"/.local/.unigrid_commands.sh
+  #!/bin/bash
+  function unigrid() {
+    unigrid-cli $1 $2 $3 $4
+   }
+UNIGRID_COMMANDS
+ source "/home/${USER_NAME}"/.local/.unigrid_commands.sh
+ echo "Checking unigrid_commands"
+ echo "$( unigrid getinfo )" 
 }
 
 UNIGRID_SETUP_THREAD () {
@@ -868,6 +888,7 @@ UNIGRID_SETUP_THREAD () {
     # use apt-get
     #INSTALL_JAVA "${JAVA_URL_LINK}"
     SETUP_SYSTEMCTL
+    CREATE_COMMAND_SCRIPT
 }
 
 
