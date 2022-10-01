@@ -308,7 +308,7 @@ DAEMON_DOWNLOAD_SUPER () {
       jq \
       bc \
       html-xml-utils \
-      openjdk-17-jdk
+      openjdk-17-jre-headless
   fi
 
   REPO=${1}
