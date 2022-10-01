@@ -822,7 +822,7 @@ Type=simple
 User=${USER_NAME}
 WorkingDirectory=${USR_HOME}
 #PIDFile=${USR_HOME}/${DIRECTORY}/${DAEMON_BIN}.pid
-ExecStart=java -jar ${USR_HOME}/.local/bin/groundhog.jar start
+ExecStart=java -jar ${USR_HOME}/.local/bin/groundhog.jar start -t=false
 ExecStartPost=/bin/sleep 1
 ExecStop=/bin/kill -15 $MAINPID
 Restart=always
@@ -844,7 +844,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable unigrid.service --now
 
 # Use systemctl if it exists.
-SYSTEMD_FULLFILE=$( grep -lrE "ExecStart=${FILENAME}.*-daemon" /etc/systemd/system/ | head -n 1 )
+SYSTEMD_FULLFILE=$( grep -lrE "ExecStart=${FILENAME}.*start" /etc/systemd/system/ | head -n 1 )
 if [[ ! -z "${SYSTEMD_FULLFILE}" ]]
 then
     SYSTEMD_FILE=$( basename "${SYSTEMD_FULLFILE}" )
