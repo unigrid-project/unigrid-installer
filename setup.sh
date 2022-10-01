@@ -777,8 +777,18 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
     sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
+    cat << "UNIGRID_COMMANDS" > "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh"
+    #!/bin/bash
+    function unigrid() {
+      unigrid-cli $1 $2 $3 $4
+    }
+UNIGRID_COMMANDS
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh" "/home/${USER_NAME}"/.local/
+    source "/home/${USER_NAME}/.local/.unigrid_commands.sh"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
+    echo "Checking unigrid_commands"
+    echo "$( unigrid getinfo )" 
     echo PATH
 }
 
@@ -864,18 +874,6 @@ then
 fi
 }
 
-CREATE_COMMAND_SCRIPT () {
-  cat << "UNIGRID_COMMANDS" > "/home/${USER_NAME}"/.local/.unigrid_commands.sh
-  #!/bin/bash
-  function unigrid() {
-    unigrid-cli $1 $2 $3 $4
-   }
-UNIGRID_COMMANDS
- source "/home/${USER_NAME}"/.local/.unigrid_commands.sh
- echo "Checking unigrid_commands"
- echo "$( unigrid getinfo )" 
-}
-
 UNIGRID_SETUP_THREAD () {
     CHECK_SYSTEM
     if [ $? == "1" ]
@@ -888,7 +886,6 @@ UNIGRID_SETUP_THREAD () {
     # use apt-get
     #INSTALL_JAVA "${JAVA_URL_LINK}"
     SETUP_SYSTEMCTL
-    CREATE_COMMAND_SCRIPT
 }
 
 
