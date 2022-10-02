@@ -29,3 +29,8 @@ systemctl reset-failed
 ```
 sudo userdel -r unigrid
 ```
+
+# To access 
+runuser -l  nafo -c 'nafo getinfo'
+
+

@@ -791,6 +791,25 @@ function ${USER_NAME}() {
 DAEMON_FUNC_CLI
 )
 UPDATE_USER_FILE "${_CLI_FUNC}" "${USER_NAME}" "${1}/.bashrc"
+
+# create a function in the ${HOME} user .bashrc
+
+CLI_LOC="${USER_NAME}/.local/bin/unigrid-cli"
+_CLI_FUNC2=$( cat << FUNC_CLI
+# Start of function for ${USER_NAME}2.
+function ${USER_NAME}2() {
+  if [[ "$( whoami )" == "${USER_NAME}" ]]
+    then
+     ${CLI_LOC} \${1} \${2} \${3} \${4} \${5}
+    else
+      sudo su "${USER_NAME}" -c ${CLI_LOC} \${1} \${2} \${3} \${4} \${5}
+  fi
+  unigrid-cli \${1} \${2} \${3} \${4} \${5}
+}
+# End of function for ${USER_NAME}2.
+FUNC_CLI
+)
+UPDATE_USER_FILE "${_CLI_FUNC2}" "${USER_NAME}2" "${HOME}/.bashrc"
 }
 
 MOVE_FILES_SETOWNER () {
