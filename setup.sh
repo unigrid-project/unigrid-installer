@@ -884,7 +884,7 @@ WantedBy=multi-user.target
 SYSTEMD_CONF
 
 sudo systemctl daemon-reload
-sudo systemctl enable unigrid.service --now
+sudo systemctl enable "${USER_NAME}".service --now
 
 # Use systemctl if it exists.
 SYSTEMD_FULLFILE=$( grep -lrE "ExecStart=${FILENAME}.*start" /etc/systemd/system/ | head -n 1 )
