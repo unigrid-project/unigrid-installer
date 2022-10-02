@@ -12,3 +12,13 @@ To use a custom usernam, use the code like this. Replacing `<USERNAME>` with wha
 ```
 sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/unigrid.sh)" 'source ~/.bashrc' <USERNAME>
 ```
+
+# Removing the service
+
+```
+systemctl stop unigrid.service 
+systemctl disable unigrid.service  
+rm /etc/systemd/system/unigrid.service  
+systemctl daemon-reload 
+systemctl reset-failed
+```

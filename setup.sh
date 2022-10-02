@@ -865,7 +865,7 @@ Type=simple
 User=${USER_NAME}
 WorkingDirectory=${USR_HOME}
 #PIDFile=${USR_HOME}/${DIRECTORY}/${DAEMON_BIN}.pid
-ExecStart=java -jar ${USR_HOME}/.local/bin/groundhog.jar start -t=false
+ExecStart=java -jar ${USR_HOME}/.local/bin/groundhog.jar start -t=false -l=${USR_HOME}/.local/bin/
 ExecStartPost=/bin/sleep 1
 ExecStop=/bin/kill -15 $MAINPID
 Restart=always
