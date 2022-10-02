@@ -822,8 +822,7 @@ MOVE_FILES_SETOWNER () {
     source "${HOME}/.bashrc"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
-    echo "Checking unigrid_commands"
-    echo "$( unigrid getinfo )" 
+    echo "bins moved and .bashrc command created"
 }
 
 INSTALL_JAVA () {

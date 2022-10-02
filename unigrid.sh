@@ -29,8 +29,15 @@ HEDGEHOD_REPO=''
 GROUNDHOG_REPO='unigrid-project/groundhog'
 # GitHub Auth Token
 AUTH_TOKEN=''
+USER_NAME=''
 # Set username
+if [[ ! -z "$1" ]]
+then
+USER_NAME="${1}"
+else
 USER_NAME='unigrid'
+fi
+
 # Display Name.
 DAEMON_NAME='UNIGRID'
 # Coin Ticker.
