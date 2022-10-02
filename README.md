@@ -22,3 +22,10 @@ rm /etc/systemd/system/unigrid.service
 systemctl daemon-reload 
 systemctl reset-failed
 ```
+
+# Remove the user
+`TODO turn this into a script that accepts the username as an arg`
+
+```
+sudo userdel -r unigrid
+```
