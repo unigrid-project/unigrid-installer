@@ -790,7 +790,7 @@ function ${USER_NAME}() {
 # End of function for ${USER_NAME}.
 DAEMON_FUNC_CLI
 )
-UPDATE_USER_FILE "${_CLI_FUNC}" "${USER_NAME}" "${HOME}/.bashrc"
+UPDATE_USER_FILE "${_CLI_FUNC}" "${USER_NAME}" "${1}/.bashrc"
 }
 
 MOVE_FILES_SETOWNER () {
@@ -817,7 +817,8 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
     sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
-    USER_FUNCTION_FOR_CLI
+    # location for .bashrc function
+    USER_FUNCTION_FOR_CLI "/home/${USER_NAME}"
     source "${HOME}/.bashrc"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
