@@ -57,7 +57,7 @@ CLEANUP_SYSTEMCTL() {
 
 REMOVE_USER() {
     echo "Removing ${USER_NAME} from server"
-    sudo userdel -r unigrid
+    sudo userdel -r "${USER_NAME}"
 }
 
 ASCII_ART
