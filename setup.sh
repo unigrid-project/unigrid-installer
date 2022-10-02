@@ -777,12 +777,12 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
     sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
-    cat << "UNIGRID_COMMANDS" > "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh"
+    sudo cat << "UNIGRID_COMMANDS" > "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh"
     #!/bin/bash
     function unigrid() {
       unigrid-cli $1 $2 $3 $4
     }
-    function test() {
+    function wtf() {
       unigrid-cli $1
     }
 UNIGRID_COMMANDS
