@@ -753,6 +753,46 @@ GROUNDHOG_DOWNLOAD_SUPER () {
   fi
 }
 
+UPDATE_USER_FILE () {
+  STRING=${1}
+  FUNCTION_NAME=${2}
+  FILENAME=${3/#\~/$HOME}
+
+  # Replace ${FUNCTION_NAME} function if it exists.
+  FUNC_START=$( grep -Fxn "# Start of function for ${FUNCTION_NAME}." "${FILENAME}" | sed 's/:/ /g' | awk '{print $1 }' | sort -r )
+  FUNC_END=$( grep -Fxn "# End of function for ${FUNCTION_NAME}." "${FILENAME}" | sed 's/:/ /g' | awk '{print $1 }' | sort -r )
+  if [ ! -z "${FUNC_START}" ] && [ ! -z "${FUNC_END}" ]
+  then
+    paste <( echo "${FUNC_START}" ) <( echo "${FUNC_END}" ) -d ' ' | while read -r START END
+    do
+      sed -i "${START},${END}d" "${FILENAME}"
+    done
+  fi
+  # Remove empty lines at end of file.
+  sed -i -r '${/^[[:space:]]*$/d;}' "${FILENAME}"
+  echo "" >> "${FILENAME}"
+  # Add in ${FUNCTION_NAME} function.
+  {
+    echo "${STRING}"; echo ""
+  } >> "${FILENAME}"
+
+  # Remove double empty lines in the file.
+  sed -i '/^$/N;/^\n$/D' "${FILENAME}"
+}
+
+USER_FUNCTION_FOR_CLI () {
+# Create function that can control the new gridnode daemon.
+_CLI_FUNC=$( cat << DAEMON_FUNC_CLI
+# Start of function for ${USER_NAME}.
+function ${USER_NAME}() {
+  unigrid-cli "\${1}" "\${2}" "\${3}" "\${4}" "\${5}"
+}
+# End of function for ${USER_NAME}.
+DAEMON_FUNC_CLI
+)
+UPDATE_USER_FILE "${_CLI_FUNC}" "${USER_NAME}" "${HOME}/.bashrc"
+}
+
 MOVE_FILES_SETOWNER () {
     sudo true >/dev/null 2>&1
     if ! sudo useradd -m "${USER_NAME}" -s /bin/bash 2>/dev/null
@@ -777,18 +817,8 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
     sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
-    sudo cat << "UNIGRID_COMMANDS" > "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh"
-    #!/bin/bash
-    function unigrid() {
-      unigrid-cli $1 $2 $3 $4
-    }
-    function wtf() {
-      unigrid-cli $1
-    }
-UNIGRID_COMMANDS
-    sudo cp "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh" "/home/${USER_NAME}"/.local/bin/
-    sudo chmod +x "/home/${USER_NAME}"/.local/bin/.unigrid_commands.sh
-    source "/home/${USER_NAME}/.local/bin/.unigrid_commands.sh"
+    USER_FUNCTION_FOR_CLI
+    source "${HOME}/.bashrc"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
     echo "Checking unigrid_commands"
