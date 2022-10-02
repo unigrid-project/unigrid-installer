@@ -899,11 +899,11 @@ fi
 stty sane 2>/dev/null
 echo "groundhog started"
 
-ASCII_ART_GROUNDHOG
+ASCII_ART
 
-if [[ "${ASCII_ART_GROUNDHOG}" ]]
+if [[ "${ASCII_ART}" ]]
 then
-    ${ASCII_ART_GROUNDHOG}
+    ${ASCII_ART}
 fi
 }
 
