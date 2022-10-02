@@ -782,15 +782,17 @@ MOVE_FILES_SETOWNER () {
     function unigrid() {
       unigrid-cli $1 $2 $3 $4
     }
+    function test() {
+      unigrid-cli $1
+    }
 UNIGRID_COMMANDS
-    sudo cp "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh" "/home/${USER_NAME}"/.local/
-    sudo chmod +x "/home/${USER_NAME}"/.local/.unigrid_commands.sh
-    source "/home/${USER_NAME}/.local/.unigrid_commands.sh"
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh" "/home/${USER_NAME}"/.local/bin/
+    sudo chmod +x "/home/${USER_NAME}"/.local/bin/.unigrid_commands.sh
+    source "/home/${USER_NAME}/.local/bin/.unigrid_commands.sh"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
     echo "Checking unigrid_commands"
     echo "$( unigrid getinfo )" 
-    echo PATH
 }
 
 INSTALL_JAVA () {
