@@ -784,6 +784,7 @@ MOVE_FILES_SETOWNER () {
     }
 UNIGRID_COMMANDS
     sudo cp "/var/unigrid/${DAEMON_DIR}/src/.unigrid_commands.sh" "/home/${USER_NAME}"/.local/
+    sudo chmod +x "/home/${USER_NAME}"/.local/.unigrid_commands.sh
     source "/home/${USER_NAME}/.local/.unigrid_commands.sh"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
