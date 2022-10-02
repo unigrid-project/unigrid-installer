@@ -82,8 +82,8 @@ cat << "UNIGRID"
 | |_| | |\  || | |_| |  _ < | || |_| |
  \___/|_| \_|___\____|_| \_\___|____/
 
-UGD Software AB 2022  
-                                    
+Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB 
+
 UNIGRID
 }
 
