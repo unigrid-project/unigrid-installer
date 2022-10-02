@@ -785,7 +785,7 @@ USER_FUNCTION_FOR_CLI () {
 _CLI_FUNC=$( cat << DAEMON_FUNC_CLI
 # Start of function for ${USER_NAME}.
 function ${USER_NAME}() {
-  unigrid-cli "\${1}" "\${2}" "\${3}" "\${4}" "\${5}"
+  unigrid-cli \${1} \${2} \${3} \${4} \${5}
 }
 # End of function for ${USER_NAME}.
 DAEMON_FUNC_CLI
