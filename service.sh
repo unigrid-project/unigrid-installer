@@ -8,15 +8,15 @@ NAME=unigrid
 PIDFILE=/run/$NAME.pid
 
 # Full path to executable
-DAEMON="java -- -jar /home/root/.local/bin/groundhog.jar"
+DAEMON="java -- -jar /usr/local/bin/groundhog.jar"
 
 # Options
-DAEMON_OPTS="start -t=false -l=/home/root/.local/bin/"
+DAEMON_OPTS="start -t=false -l=/usr/local/bin/"
 
 # User to run the command as
 USER=root
 
-CLI='/home/root/.local/bin/unigrid-cli'
+CLI='/usr/local/bin/unigrid-cli'
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 

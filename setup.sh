@@ -851,22 +851,30 @@ MOVE_FILES_SETOWNER () {
    
 
     #sudo usermod -a -G systemd-journal "${USER_NAME}"
-    chsh -s /bin/bash
+    #chsh -s /bin/bash
     DAEMON_DIR='unigrid-project_daemon'
     GROUNDHOG_DIR='unigrid-project_groundhog'
-    echo "moving daemon to /home/${USER_NAME}/.local/bin"
-    sudo mkdir -p "/home/${USER_NAME}"/.local/bin
-    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${DAEMON_BIN}" "/home/${USER_NAME}"/.local/bin/
-    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${DAEMON_BIN}"
-    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
-    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
-    sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
-    sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
+    echo "moving daemon to /usr/local/bin"
+    sudo mkdir -p "/usr/local/bin"
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${DAEMON_BIN}" "/usr/local/bin"
+    sudo chmod +x /usr/local/bin/"${DAEMON_BIN}"
+    sudo cp "/var/unigrid/${DAEMON_DIR}/src/${CONTROLLER_BIN}" usr/local/bin/
+    sudo chmod +x /usr/local/bin/"${CONTROLLER_BIN}"
+    sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" /usr/local/bin/"groundhog.jar"
+    sudo chmod +x /usr/local/bin/"groundhog.jar"
+    # echo "moving daemon to /home/${USER_NAME}/.local/bin"
+    # sudo mkdir -p "/home/${USER_NAME}"/.local/bin
+    # sudo cp "/var/unigrid/${DAEMON_DIR}/src/${DAEMON_BIN}" "/home/${USER_NAME}"/.local/bin/
+    # sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${DAEMON_BIN}"
+    # sudo cp "/var/unigrid/${DAEMON_DIR}/src/${CONTROLLER_BIN}" "/home/${USER_NAME}"/.local/bin/
+    # sudo chmod +x "/home/${USER_NAME}"/.local/bin/"${CONTROLLER_BIN}"
+    # sudo cp "/var/unigrid/${GROUNDHOG_DIR}/src/${GROUNDHOG_BIN}" "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
+    # sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     # location for .bashrc function
-    USER_FUNCTION_FOR_CLI "/home/${USER_NAME}"
+    # USER_FUNCTION_FOR_CLI "/home/${USER_NAME}"
     #source "${HOME}/.bashrc"
-    sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
-    export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
+    #sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
+    #export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
     echo "bins moved and .bashrc command created"
 }
 
