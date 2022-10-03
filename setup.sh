@@ -963,6 +963,8 @@ fi
 
 CREATE_CRONTAB_JOB() {
   echo "write out current crontab"
+  touch rebootcron
+  crontab rebootcron
   crontab -l > rebootcron
   echo "new cron into cron file"
   echo "@reboot /usr/local/bin/service.sh start" >> rebootcron
