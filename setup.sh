@@ -987,8 +987,7 @@ UNIGRID_SETUP_THREAD () {
     if [[ "${ASCII_ART}" ]]
       then
           ${ASCII_ART}
-      fi
-    }
+    fi
     echo "Install Complete"
     exit 0
     # use apt-get
@@ -996,8 +995,7 @@ UNIGRID_SETUP_THREAD () {
     #SETUP_SYSTEMCTL
 }
 
-
 stty sane 2>/dev/null
 echo
-sleep 0.1
+#sleep 0.1
 # End of setup script.
