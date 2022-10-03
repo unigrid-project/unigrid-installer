@@ -850,7 +850,7 @@ MOVE_FILES_SETOWNER () {
     done
    
 
-    sudo usermod -a -G systemd-journal "${USER_NAME}"
+    #sudo usermod -a -G systemd-journal "${USER_NAME}"
     chsh -s /bin/bash
     DAEMON_DIR='unigrid-project_daemon'
     GROUNDHOG_DIR='unigrid-project_groundhog'
@@ -864,7 +864,7 @@ MOVE_FILES_SETOWNER () {
     sudo chmod +x "/home/${USER_NAME}"/.local/bin/"groundhog.jar"
     # location for .bashrc function
     USER_FUNCTION_FOR_CLI "/home/${USER_NAME}"
-    source "${HOME}/.bashrc"
+    #source "${HOME}/.bashrc"
     sudo chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}"
     export PATH=$PATH":/home/${USER_NAME}"/.local/bin/
     echo "bins moved and .bashrc command created"
