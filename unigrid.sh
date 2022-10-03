@@ -35,7 +35,8 @@ if [[ ! -z "$1" ]]
 then
 USER_NAME="${1}"
 else
-USER_NAME='unigrid'
+# Set user to whoever runs the script
+USER_NAME=$(( whoami ))
 fi
 
 # Display Name.
