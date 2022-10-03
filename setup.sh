@@ -962,11 +962,11 @@ fi
 }
 
 CREATE_CRONTAB_JOB() {
-  #write out current crontab
+  echo "write out current crontab"
   crontab -l > rebootcron
-  #echo new cron into cron file
+  echo "new cron into cron file"
   echo "@reboot /usr/local/bin/service.sh start" >> rebootcron
-  #install new cron file
+  echo "install new cron file"
   crontab rebootcron
   rm rebootcron
 }
@@ -981,6 +981,16 @@ UNIGRID_SETUP_THREAD () {
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
     CREATE_CRONTAB_JOB
+    stty sane 2>/dev/null
+    ASCII_ART
+
+    if [[ "${ASCII_ART}" ]]
+      then
+          ${ASCII_ART}
+      fi
+    }
+    echo "Install Complete"
+    exit 0
     # use apt-get
     #INSTALL_JAVA "${JAVA_URL_LINK}"
     #SETUP_SYSTEMCTL
@@ -988,6 +998,6 @@ UNIGRID_SETUP_THREAD () {
 
 
 stty sane 2>/dev/null
-echo "Install Complete"
-#sleep 0.1
+echo
+sleep 0.1
 # End of setup script.
