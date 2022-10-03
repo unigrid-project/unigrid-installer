@@ -60,6 +60,7 @@ CHECK_SYSTEM () {
 
   # Check for systemd
   systemctl --version >/dev/null 2>&1 || { cat /etc/*-release; echo; echo "systemd is required. Are you using a Debian based distro?" >&2; return 1 2>/dev/null || exit 1; }
+
 }
 
 WAIT_FOR_APT_GET () {
@@ -822,6 +823,32 @@ MOVE_FILES_SETOWNER () {
             echo
         fi
     fi
+    # Make a unigrid directory if it doesn't exist
+    mkdir -p /home/"${USER_NAME_CURRENT}"/.local/unigrid
+    # TODO get unigrid directories and create a new one
+    for dir in "${USR_HOME}"/.local/*/; do echo "$dir"; done
+    DIR_ARRAY=()
+    TEMP_NAME=''
+    for dir in /home/evan/.local/unigrid/*; do DIR_ARRAY+="${dir##*/}"; done
+    # Last folder
+    echo ${DIR_ARRAY[0]}
+    arrIN=(${TEMP_NAME//_/ })
+    echo ${arrIN[1]} 
+
+    DIR_ARRAY=()
+    for dir in  /home/evan/.local/unigrid/*; do
+      COUNTER=$(( COUNTER+1 ))
+      #DIR_ARRAY+=${dir##*/}
+    done
+    echo $COUNTER
+    for dir_name in ${DIR_ARRAY}; do
+      echo ${dir_name}
+    done
+
+    for value in "${DIR_ARRAY[@]}"; do
+      echo $value
+    done
+   
 
     sudo usermod -a -G systemd-journal "${USER_NAME}"
     chsh -s /bin/bash
@@ -873,6 +900,7 @@ echo "Creating systemd service for ${DAEMON_NAME}"
 GN_TEXT="Creating systemd shutdown service."
 GN_TEXT1="Shutdown service for unigrid"
 
+# TODO shange USER_NAME to DIR_NAME
 cat << SYSTEMD_CONF | sudo tee /etc/systemd/system/"${USER_NAME}".service >/dev/null
 [Unit]
 Description=${DAEMON_NAME} for user ${USER_NAME}
@@ -936,7 +964,7 @@ UNIGRID_SETUP_THREAD () {
     MOVE_FILES_SETOWNER
     # use apt-get
     #INSTALL_JAVA "${JAVA_URL_LINK}"
-    SETUP_SYSTEMCTL
+    #SETUP_SYSTEMCTL
 }
 
 
