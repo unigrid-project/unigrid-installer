@@ -997,7 +997,7 @@ UNIGRID_SETUP_THREAD () {
     #SETUP_SYSTEMCTL
 }
 
-stty sane 2>/dev/null
+#stty sane 2>/dev/null
 echo
-#sleep 0.1
+sleep 0.1
 # End of setup script.

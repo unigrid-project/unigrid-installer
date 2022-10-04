@@ -106,10 +106,10 @@ do
   fi
 done
 
-(
-  sleep 2
+#(
+ # sleep 2
   #rm ~/___ugd.sh
-) & disown
+#) & disown
 
 (
 # shellcheck disable=SC1091
@@ -119,5 +119,5 @@ UNIGRID_SETUP_THREAD
 )
 # shellcheck source=/root/.bashrc
 #. ~/.bashrc
-stty sane 2>/dev/null
+#stty sane 2>/dev/null
 exit
