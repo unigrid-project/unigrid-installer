@@ -40,8 +40,9 @@ sudo usermod -a -G docker ${CURRENT_USER}
 echo "Complete Docker Install"
 fi
 
-if [ ! -x '$( docker ps -a --no-trunc --format "{{.Mounts}}" )' ]
+if [ -x '$( docker ps -a --no-trunc --format "{{.Mounts}}" )' ]
 then
+echo "Clean install docker image"
 SERVER_NAME="${BASE_NAME}1"
 docker run -it -d --name="${SERVER_NAME}" --mount source="${DATA_VOLUME}1",destination=/root/.unigrid unigrid/unigrid:beta
 else
