@@ -990,8 +990,8 @@ UNIGRID_SETUP_THREAD () {
       then
           ${ASCII_ART}
     fi
-    echo "Install Complete"
     exit
+    echo "Install Complete"
     # use apt-get
     #INSTALL_JAVA "${JAVA_URL_LINK}"
     #SETUP_SYSTEMCTL
