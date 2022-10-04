@@ -100,7 +100,7 @@ DAEMON_DOWNLOAD_EXTRACT () {
   CONTROLLER_BIN=${3}
   DAEMON_DOWNLOAD_URL=${4}
 
-  UBUNTU_VERSION=$( lsb_release -sr )
+  #UBUNTU_VERSION=$( lsb_release -sr )
   FOUND_DAEMON=0
   FOUND_CLI=0
   while read -r GITHUB_URL
@@ -246,7 +246,7 @@ JAR_DOWNLOAD_EXTRACT () {
   JAR_BIN=${2}
   JAR_DOWNLOAD_URL=${3}
 
-  UBUNTU_VERSION=$( lsb_release -sr )
+  #UBUNTU_VERSION=$( lsb_release -sr )
   FOUND_JAR=0
   while read -r GITHUB_URL_JAR
   do
