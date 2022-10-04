@@ -40,9 +40,7 @@ case "$1" in
         echo "."
         ;;
   unigrid)
-        echo -n "calling unigrid: "$NAME
-        ($CLI $2 $3 $4 $5) 
-        echo "."
+        echo -n `($CLI $2 $3 $4 $5)`
         ;;
   status)
         status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
