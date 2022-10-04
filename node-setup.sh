@@ -33,7 +33,7 @@ fi
 if [ ! -x '$( docker ps -a --no-trunc --format "{{.Mounts}}" )' ]
 then
 SERVER_NAME="${BASE_NAME}1"
-docker run -it --name="${SERVER_NAME}" --mount source=data-volume_1,destination=/root/.unigrid unigrid/unigrid:beta
+docker run -it -d --name="${SERVER_NAME}" --mount source=data-volume_1,destination=/root/.unigrid unigrid/unigrid:beta
 else
 SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
 echo ${SERVER_NAME}
