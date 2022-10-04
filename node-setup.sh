@@ -59,7 +59,6 @@ eval "ARR=($ARRAY)"
 for s in "${ARR[@]}"; do 
     #echo "$s"
     ITEM="$(echo ${s} | cut -d'_' -f3)"
-    echo ${ITEM}
     NUMBERS_ARRAY+=( "$ITEM" )
 done
 echo ${NUMBERS_ARRAY[@]}
@@ -110,7 +109,7 @@ echo "Done copying volume"
 docker run -it -d --name="${NEW_SERVER_NAME}" --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid unigrid/unigrid:beta
 fi
 
-CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${SERVER_NAME}"` )
+CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${NEW_SERVER_NAME}"` )
 echo "${CURRENT_CONTAINER_ID}"
 docker start "${CURRENT_CONTAINER_ID}"
 echo "Starting ${CURRENT_CONTAINER_ID}"
