@@ -26,8 +26,9 @@ sudo bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project
 BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
-
+NUMBERS_ARRAY=()
 echo "Starting Docker Instll Script"
+
 
 if [ ! -x "$( command -v docker )" ]
 then
@@ -48,30 +49,54 @@ docker run -it -d --name="${SERVER_NAME}" --mount source="${DATA_VOLUME}1",desti
 else
 # Get all of the images names
 SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
-# array from string
 # DOCKERS="ugd_docker_1 ugd_docker_2 ugd_docker_3"
 DOCKERS=${SERVER_NAME}
 ARRAY=(`echo ${DOCKERS}`);
 echo ${#ARRAY[@]}
-ARRAY_LENGTH="$(echo ${#ARRAY[@]})"
-LAST_DOCKER_NAME=${ARRAY[$((${ARRAY_LENGTH}-1))]}
-echo ${LAST_DOCKER_NAME}
-# split the string by _ and get the #
-A="$(echo ${LAST_DOCKER_NAME} | cut -d'_' -f3)"
-B="$(($A + 1))"
-NEW_SERVER_NAME=${BASE_NAME}${B}
+######### GET HIGHEST NUMBER IN THE ARRAY ##########
+#ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
+eval "ARR=($ARRAY)"
+for s in "${ARR[@]}"; do 
+    #echo "$s"
+    ITEM="$(echo ${s} | cut -d'_' -f3)"
+    echo ${ITEM}
+    NUMBERS_ARRAY+=( "$ITEM" )
+done
+echo ${NUMBERS_ARRAY[@]}
+NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
+echo ${NUMBERS_ARRAY[@]}
+ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
+LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
+echo ${LAST_DOCKER_NUMBER}
+######### GET HIGHEST NUMBER IN THE ARRAY ##########
 
+B="$(($LAST_DOCKER_NUMBER + 1))"
+NEW_SERVER_NAME=${BASE_NAME}${B}
+echo ${NEW_SERVER_NAME}
 # Get all of the volumes names
 VOLUME_NAMES=$(docker ps -a --no-trunc --format '{{.Mounts}}')
 VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
 echo ${VOLUME_ARRAY}
-ARRAY_LENGTH="$(echo ${#VOLUME_ARRAY[@]})"
-LAST_VOLUME_NAME=${VOLUME_ARRAY[$((${ARRAY_LENGTH}-1))]}
-echo ${LAST_VOLUME_NAME}
-# split the string by _ and get the #
-A="$(echo ${LAST_DOCKER_NAME} | cut -d'_' -f3)"
-B="$(($A + 1))"
+######### GET HIGHEST NUMBER IN THE ARRAY ##########
+#ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
+eval "ARR=($VOLUME_ARRAY)"
+for s in "${ARR[@]}"; do 
+    #echo "$s"
+    ITEM="$(echo ${s} | cut -d'_' -f3)"
+    echo ${ITEM}
+    NUMBERS_ARRAY+=( "$ITEM" )
+done
+echo ${NUMBERS_ARRAY[@]}
+NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
+echo ${NUMBERS_ARRAY[@]}
+ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
+LAST_VOLUME_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
+echo ${LAST_VOLUME_NUMBER}
+######### GET HIGHEST NUMBER IN THE ARRAY ##########
+
+B="$(($LAST_VOLUME_NUMBER + 1))"
 NEW_VOLUME_NAME=${DATA_VOLUME}${B}
+echo ${NEW_VOLUME_NAME}
 
 echo "Copy Volume and run"
 docker run --rm \
