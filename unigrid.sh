@@ -108,7 +108,7 @@ done
 
 (
   sleep 2
-  rm ~/___ugd.sh
+  #rm ~/___ugd.sh
 ) & disown
 
 (
