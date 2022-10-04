@@ -70,7 +70,7 @@ echo ${LAST_VOLUME_NAME}
 # split the string by _ and get the #
 A="$(echo ${LAST_DOCKER_NAME} | cut -d'_' -f3)"
 B="$(($A + 1))"
-NEW_VOLUME_NAME=${BASE_NAME}${B}
+NEW_VOLUME_NAME=${DATA_VOLUME}${B}
 
 echo "Copy Volume and run"
 docker run --rm \
