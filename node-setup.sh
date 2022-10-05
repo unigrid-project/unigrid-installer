@@ -125,7 +125,7 @@ CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${NEW_SERVER_NAME}"` )
 echo "${CURRENT_CONTAINER_ID}"
 docker start "${CURRENT_CONTAINER_ID}"
 echo "Starting ${CURRENT_CONTAINER_ID}"
-#docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
 sleep 1.5
 
