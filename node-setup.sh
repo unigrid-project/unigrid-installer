@@ -21,12 +21,14 @@
 sudo bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" 'source ~/.bashrc'
 ```
 '
-
-
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
 BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
+WATCHTOWER_INSTALLED=false
+
 echo "Starting Docker Instll Script"
 
 
@@ -38,12 +40,12 @@ sudo groupadd docker
 CURRENT_USER=$(whoami)
 echo ${CURRENT_USER}
 sudo usermod -a -G docker ${CURRENT_USER}
-echo "Complete Docker Install"
+echo "Completed Docker Install"
 fi
 
 if [ -x '$( docker ps -a --no-trunc --format "{{.Mounts}}" )' ]
 then
-echo "Clean install docker image"
+echo "${GREEN}Clean install docker image"
 SERVER_NAME="${BASE_NAME}1"
 docker run -it -d --name="${SERVER_NAME}" --mount source="${DATA_VOLUME}1",destination=/root/.unigrid unigrid/unigrid:beta
 else
@@ -52,46 +54,54 @@ SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
 # DOCKERS="ugd_docker_1 ugd_docker_2 ugd_docker_3"
 DOCKERS=${SERVER_NAME}
 ARRAY=(`echo ${DOCKERS}`);
-echo ${#ARRAY[@]}
-######### GET HIGHEST NUMBER IN THE ARRAY ##########
+
+######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 #ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($ARRAY)"
-for s in "${ARR[@]}"; do 
-    #echo "$s"
+for s in "${ARR[@]}"; do
+    if [[ "$s" == 'watchtower' ]] 
+    then
+        WATCHTOWER_INSTALLED=true
+    fi
     ITEM="$(echo ${s} | cut -d'_' -f3)"
     NUMBERS_ARRAY+=( "$ITEM" )
 done
-echo ${NUMBERS_ARRAY[@]}
+
+# Run watchtower if not found
+if [ "$WATCHTOWER_INSTALLED" = false ] ; then
+    echo "${GREEN}Installing watchtower"
+    docker run -d \
+        --name watchtower \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        containrrr/watchtower --debug -c \
+        --trace --include-restarting --interval 30
+fi
+
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-echo ${NUMBERS_ARRAY[@]}
+
 ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
 LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
-echo ${LAST_DOCKER_NUMBER}
-######### GET HIGHEST NUMBER IN THE ARRAY ##########
+
+######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 
 B="$(($LAST_DOCKER_NUMBER + 1))"
 NEW_SERVER_NAME=${BASE_NAME}${B}
-echo ${NEW_SERVER_NAME}
 # Get all of the volumes names
 VOLUME_NAMES=$(docker ps -a --no-trunc --format '{{.Mounts}}')
 VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
-echo ${VOLUME_ARRAY}
-######### GET HIGHEST NUMBER IN THE ARRAY ##########
+
+######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
 #ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($VOLUME_ARRAY)"
 for s in "${ARR[@]}"; do 
-    #echo "$s"
     ITEM="$(echo ${s} | cut -d'_' -f3)"
-    echo ${ITEM}
     NUMBERS_ARRAY+=( "$ITEM" )
 done
-echo ${NUMBERS_ARRAY[@]}
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-echo ${NUMBERS_ARRAY[@]}
 ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
 LAST_VOLUME_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
-echo ${LAST_VOLUME_NUMBER}
-######### GET HIGHEST NUMBER IN THE ARRAY ##########
+
+######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
 
 B="$(($LAST_VOLUME_NUMBER + 1))"
 NEW_VOLUME_NAME=${DATA_VOLUME}${B}
@@ -106,37 +116,53 @@ docker run --rm \
            -v data-volume4:/to \
            alpine ash -c "cd /from ; cp -av . /to"
 echo "Done copying volume"
-docker run -it -d --name="${NEW_SERVER_NAME}" --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid unigrid/unigrid:beta
+docker run -it -d --name="${NEW_SERVER_NAME}" \
+    --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
+    unigrid/unigrid:beta /usr/local/bin/ugd_service start
 fi
 
 CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${NEW_SERVER_NAME}"` )
 echo "${CURRENT_CONTAINER_ID}"
 docker start "${CURRENT_CONTAINER_ID}"
 echo "Starting ${CURRENT_CONTAINER_ID}"
-docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+#docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
 sleep 1.5
 
 docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
 sleep 1
-docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
+# docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
 
-# sudo groupadd docker
-# CURRENT_USER=$(whoami)
-# echo ${CURRENT_USER}
-# sudo usermod -a -G docker ${CURRENT_USER}
-# sudo chown "$CURRENT_USER":"$CURRENT_USER" /home/"$CURRENT_USER"/.docker -R
-# sudo chmod g+rwx "$CURRENT_USER/.docker" -R
+# FOR LOOP TO CHECK CHAIN IS SYNCED
+BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+sleep 0.5
+while [[ "$BLOCK_COUNT" = "-1" ]]
+do
+    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+    echo "${CYAN}Block count: ${BLOCK_COUNT}"
+    sleep 5
+done
+echo -e "${GREEN}Unigrid daemon fully synced!"
+
+
 echo
-echo "Completed Docker Install Script."
-echo "Docker container ${CURRENT_CONTAINER_ID} has started!"
-echo "To call the unigrid daemon use..."
-echo "docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid help"
-echo "To access the container you can type..."
-echo "docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
-echo "To see a full list of all containers use..."
-echo "docker ps"
-echo "For help"
-echo "docker --help"
-echo "If you would like to install another node simply run this script again."
+echo -e "${CYAN}Completed Docker Install Script."
+echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!" 
+echo -e "${CYAN}To call the unigrid daemon use..."
+echo
+echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid help"
+echo
+echo -e "${CYAN}To access the container you can type..."
+echo
+echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
+echo
+echo -e "${CYAN}To see a full list of all containers use..."
+echo
+echo -e "${GREEN}docker ps"
+echo
+echo -e "${CYAN}For help"
+echo
+echo -e "${GREEN}docker --help"
+echo
+echo -e "${CYAN}If you would like to install another node simply run this script again."
 echo
