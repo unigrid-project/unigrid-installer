@@ -112,13 +112,13 @@ docker run --rm \
            -i \
            -d \
            -t \
-           -v data-volume:/from \
-           -v data-volume4:/to \
+           -v ${DATA_VOLUME}1:/from \
+           -v ${DATA_VOLUME}${B}:/to \
            alpine ash -c "cd /from ; cp -av . /to"
 echo "Done copying volume"
 docker run -it -d --name="${NEW_SERVER_NAME}" \
     --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
-    unigrid/unigrid:beta /usr/local/bin/ugd_service start
+    unigrid/unigrid:beta # /usr/local/bin/ugd_service start
 fi
 
 CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${NEW_SERVER_NAME}"` )
