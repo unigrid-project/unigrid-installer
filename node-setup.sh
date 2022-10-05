@@ -59,9 +59,11 @@ ARRAY=(`echo ${DOCKERS}`);
 #ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($ARRAY)"
 for s in "${ARR[@]}"; do
-    if [[ "$s" == 'watchtower' ]] 
+    if [[ "$s" = 'watchtower' ]] 
     then
         WATCHTOWER_INSTALLED=true
+    else
+        WATCHTOWER_INSTALLED=false 
     fi
     ITEM="$(echo ${s} | cut -d'_' -f3)"
     NUMBERS_ARRAY+=( "$ITEM" )
@@ -139,7 +141,7 @@ sleep 0.5
 while [[ "$BLOCK_COUNT" = "-1" ]]
 do
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-    echo "${CYAN}Block count: ${BLOCK_COUNT}"
+    echo "Block count: ${BLOCK_COUNT}"
     sleep 5
 done
 echo -e "${GREEN}Unigrid daemon fully synced!"
