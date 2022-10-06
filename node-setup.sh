@@ -85,7 +85,11 @@ fi
 #NUMBERS_ARRAY=("ugd_docker_0")
 
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
+if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
+ARRAY_LENGTH='1'
+else
 ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
+fi
 echo ${ARRAY_LENGTH}
 LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
 B="$(($LAST_DOCKER_NUMBER + 1))"
@@ -153,7 +157,10 @@ sleep 0.5
 while [[ "$BLOCK_COUNT" = "-1" ]]
 do
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-    echo "Block count: ${BLOCK_COUNT}"
+    sleep 0.1
+    BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappingstatus)
+    echo -e "\\r${SP:i++%${#SP}:1} Waiting for wallet to sync... \\c/r\033[K"
+    echo -e "${BOOT_STRAPPING}"
     sleep 5
 done
 echo -e "${GREEN}Unigrid daemon fully synced!"
