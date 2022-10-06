@@ -66,7 +66,7 @@ INSTALL_NEW_NODE() {
     # Get all of the images names
     SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
     sleep 0.1
-    declare -a ARR=( $SERVER_NAME )
+    declare -a ARR=($SERVER_NAME)
 
     for s in "${ARR[@]}"; do
         if [[ "$s" != 'watchtower' ]]; then
@@ -134,27 +134,30 @@ INSTALL_COMPLETE() {
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
     sleep 1
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
-
-    # FOR LOOP TO CHECK CHAIN IS SYNCED
-    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-    sleep 0.5
-    while [[ "$BLOCK_COUNT" = "-1" ]]; do
+    # we only need to do this for the first node as the rest copy this nodes volume
+    if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
+        # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-        sleep 0.1
-        BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
-        sleep 0.1
-        echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
-        #seq 1 1000000 | while read i; do echo -en "\r$i"; done
-        stty sane 2>/dev/null
-        sleep 5
-    done
+        sleep 0.5
+        while [[ "$BLOCK_COUNT" = "-1" ]]; do
+            BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+            sleep 0.1
+            BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
+            sleep 0.1
+            echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
+            #seq 1 1000000 | while read i; do echo -en "\r$i"; done
+            stty sane 2>/dev/null
+            sleep 5
+        done
+    fi
+
     echo -e "${GREEN}Unigrid daemon fully synced!"
     echo
     echo -e "${CYAN}Completed Docker Install Script."
     echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
     echo
-    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid help"
+    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo"
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo
