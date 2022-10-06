@@ -64,18 +64,9 @@ CHECK_FOR_NODE_INSTALL() {
 
 INSTALL_NEW_NODE() {
     # Get all of the images names
-    SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
-    #DOCKERS=""
-    DOCKERS=${SERVER_NAME}
-    ARRAY=($(echo ${DOCKERS}))
-    eval "ARR=($ARRAY)"
-    # can probably remove this now
-    # since 
-    if [ "${#ARR[@]}" = "0" ]; then
-        DOCKERS="${BASE_NAME}0"
-        ARRAY=($(echo ${DOCKERS}))
-    fi
-    #NUMBERS_ARRAY=("ugd_docker_0")
+    SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
+    declare -a ARR=( $SERVER_NAME )
+
     for s in "${ARR[@]}"; do
         if [[ "$s" != 'watchtower' ]]; then
             ITEM="$(echo ${s} | cut -d'_' -f3)"
