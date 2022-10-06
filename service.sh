@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 set -e
 . /lib/lsb/init-functions
 
@@ -27,10 +26,9 @@ TEST_RESPONSE='{
 }'
 
 CHECK_IF_RUNNING() {
-      GROUNDHOG=$(pgrep groundhog)
-      echo ${GROUNDHOG}
-
-      if [ "${GROUNDHOG}" = "" ]; then
+      GROUNDHOG="$(! pgrep -f groundhog &> /dev/null ; echo $?)"
+      echo "groundhog: ${GROUNDHOG}"
+      if [ "${GROUNDHOG}" = "0" ]; then
       start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE --chuid $USER --exec $DAEMON $DAEMON_OPTS
       echo -e "${TEST_RESPONSE}"
       else
