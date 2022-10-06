@@ -48,7 +48,7 @@ INSTALL_DOCKER() {
 
 CHECK_FOR_NODE_INSTALL() {
     CHECK_NODE="$(docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1)"
-    echo "ugd_docker_1: ${CHECK_NODE}"
+    sleep 0.2
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
         docker run -it -d --name="${BASE_NAME}1" \
@@ -102,8 +102,7 @@ INSTALL_NEW_NODE() {
     docker run -it -d --name="${NEW_SERVER_NAME}" \
         --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
         --restart unless-stopped \
-        unigrid/unigrid:beta # /usr/local/bin/ugd_service start
-
+        unigrid/unigrid:beta
 }
 
 INSTALL_WATCHTOWER() {
@@ -126,9 +125,9 @@ INSTALL_COMPLETE() {
     echo "${CURRENT_CONTAINER_ID}"
     docker start "${CURRENT_CONTAINER_ID}"
     echo e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
-    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
-    #sleep 1.5
+    sleep 1.5
 
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
     sleep 1
@@ -169,6 +168,7 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
+    stty sane 2>/dev/null
 }
 
 #docker exec -i 788d300261d3 ugd_service status
