@@ -27,15 +27,17 @@ TEST_RESPONSE='{
   "progress": 0
 }'
 
-function CHECK_IF_RUNNING() {
+CHECK_IF_RUNNING() {
       GROUNDHOG=$(pgrep groundhog)
       echo ${GROUNDHOG}
 
-      if [ "${GROUNDHOG}" != "" ]; then
+      if [ "${GROUNDHOG}" = "" ]; then
+      start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE --chuid $USER --exec $DAEMON $DAEMON_OPTS
       echo -e "${TEST_RESPONSE}"
+      else
+      echo -e "Groundhog is running"
       fi
 }
-
 
 CHECK_IF_RUNNING
 
