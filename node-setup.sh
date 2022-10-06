@@ -43,11 +43,13 @@ sudo usermod -a -G docker ${CURRENT_USER}
 echo "Completed Docker Install"
 fi
 
-if [ -x '$( docker ps -a --no-trunc --format "{{.Mounts}}" )' ]
+if [ -x '$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )' ]
 then
-echo "${GREEN}Clean install docker image"
-SERVER_NAME="${BASE_NAME}1"
-docker run -it -d --name="${SERVER_NAME}" --mount source="${DATA_VOLUME}1",destination=/root/.unigrid unigrid/unigrid:beta
+    echo "${GREEN}Clean install docker image"
+    docker run -it -d --name="${BASE_NAME}1" \
+    --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
+    --restart unless-stopped \
+    unigrid/unigrid:beta
 else
 # Get all of the images names
 SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
