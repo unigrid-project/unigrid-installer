@@ -7,7 +7,7 @@ NAME=unigrid
 PIDFILE=/run/$NAME.pid
 
 # Full path to executable
-DAEMON="/usr/bin/java -jar /usr/local/bin/groundhog.jar"
+DAEMON="/usr/bin/java -- -jar /usr/local/bin/groundhog.jar"
 
 # Options
 DAEMON_OPTS="start -t=false -l=/usr/local/bin/"
