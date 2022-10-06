@@ -57,7 +57,7 @@ ARRAY=(`echo ${DOCKERS}`);
 eval "ARR=($ARRAY)"
 
 if [ "${#ARR[@]}" = "0" ]; then
-DOCKERS=${BASE_NAME}0
+DOCKERS="${BASE_NAME}0"
 ARRAY=(`echo ${DOCKERS}`);
 fi
 
@@ -82,8 +82,11 @@ if [ "$WATCHTOWER_INSTALLED" = true ] ; then
         --trace --include-restarting --interval 30
 fi
 
+#NUMBERS_ARRAY=("ugd_docker_0")
+
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
+ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
+echo ${ARRAY_LENGTH}
 LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
 B="$(($LAST_DOCKER_NUMBER + 1))"
 
@@ -98,7 +101,7 @@ VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
 eval "ARR=($VOLUME_ARRAY)"
 if [ "${#ARR[@]}" = "0" ]; then
-VOLUME_NAMES=${BASE_NAME}0
+VOLUME_NAMES="${BASE_NAME}0"
 VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
 fi
 
@@ -108,7 +111,7 @@ for s in "${ARR[@]}"; do
     NUMBERS_ARRAY+=( "$ITEM" )
 done
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
+ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
 LAST_VOLUME_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
 
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
