@@ -38,8 +38,6 @@ CHECK_IF_RUNNING() {
       fi
 }
 
-CHECK_IF_RUNNING
-
 case "$1" in
   start)
         echo -n "Starting daemon: "$NAME
