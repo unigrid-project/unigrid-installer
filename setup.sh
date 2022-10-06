@@ -970,6 +970,8 @@ CREATE_CRONTAB_JOB() {
   crontab -l > rebootcron
   echo "new cron into cron file"
   echo "@reboot /usr/local/bin/ugd_service start" >> rebootcron
+  # check every minute groundhog is still running
+  echo "* * * * * /usr/local/bin/ugd_service check" >> rebootcron
   echo ""
   echo "install new cron file"
   crontab rebootcron

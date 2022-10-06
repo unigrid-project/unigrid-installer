@@ -27,7 +27,7 @@ BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
-WATCHTOWER_INSTALLED=false
+WATCHTOWER_INSTALLED=true
 
 echo "Starting Docker Instll Script"
 
@@ -51,10 +51,10 @@ docker run -it -d --name="${SERVER_NAME}" --mount source="${DATA_VOLUME}1",desti
 else
 # Get all of the images names
 SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
-# DOCKERS="ugd_docker_1 ugd_docker_2 ugd_docker_3"
+#DOCKERS=""
 DOCKERS=${SERVER_NAME}
 ARRAY=(`echo ${DOCKERS}`);
-
+echo ${ARRAY}
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 #ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($ARRAY)"
@@ -70,7 +70,7 @@ for s in "${ARR[@]}"; do
 done
 
 # Run watchtower if not found
-if [ "$WATCHTOWER_INSTALLED" = false ] ; then
+if [ "$WATCHTOWER_INSTALLED" = true ] ; then
     echo "${GREEN}Installing watchtower"
     docker run -d \
         --name watchtower \
@@ -146,8 +146,8 @@ do
 done
 echo -e "${GREEN}Unigrid daemon fully synced!"
 
-# docker exec -i e465a15e74af ugd_service status
-
+#docker exec -i 788d300261d3 ugd_service status
+#docker container exec -it 788d300261d3 /bin/bash
 
 echo
 echo -e "${CYAN}Completed Docker Install Script."
