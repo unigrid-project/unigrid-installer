@@ -47,9 +47,9 @@ INSTALL_DOCKER() {
 }
 
 CHECK_FOR_NODE_INSTALL() {
-    CHECK_NODE="$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )"
+    CHECK_NODE="$(docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1)"
     echo "ugd_docker_1: ${CHECK_NODE}"
-    if [ -z  "${CHECK_NODE}" ]; then
+    if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
         docker run -it -d --name="${BASE_NAME}1" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
@@ -59,25 +59,31 @@ CHECK_FOR_NODE_INSTALL() {
         echo -e "${CYAN}1st node already installed"
         INSTALL_NEW_NODE
     fi
+
+}
+
+INSTALL_NEW_NODE() {
     # Get all of the images names
     SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
     #DOCKERS=""
     DOCKERS=${SERVER_NAME}
     ARRAY=($(echo ${DOCKERS}))
     eval "ARR=($ARRAY)"
-
+    # can probably remove this now
+    # since 
     if [ "${#ARR[@]}" = "0" ]; then
         DOCKERS="${BASE_NAME}0"
         ARRAY=($(echo ${DOCKERS}))
     fi
-}
-
-
-INSTALL_NEW_NODE() {
-
     #NUMBERS_ARRAY=("ugd_docker_0")
-
+    for s in "${ARR[@]}"; do
+        if [[ "$s" != 'watchtower' ]]; then
+            ITEM="$(echo ${s} | cut -d'_' -f3)"
+            NUMBERS_ARRAY+=("$ITEM")
+        fi
+    done
     NUMBERS_ARRAY=($(printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n))
+
     if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
         ARRAY_LENGTH='1'
     else
@@ -111,8 +117,8 @@ INSTALL_NEW_NODE() {
 
 INSTALL_WATCHTOWER() {
     # Run watchtower if not found
-    CHECK_WATCHTOWER="$( docker ps -f name=watchtower | grep -w watchtower )"
-     if [ -z  "${CHECK_WATCHTOWER}" ]; then
+    CHECK_WATCHTOWER="$(docker ps -f name=watchtower | grep -w watchtower)"
+    if [ -z "${CHECK_WATCHTOWER}" ]; then
         echo -e "${GREEN}Installing watchtower"
         docker run -d \
             --name watchtower \
