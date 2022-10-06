@@ -47,8 +47,9 @@ INSTALL_DOCKER() {
 }
 
 CHECK_FOR_NODE_INSTALL() {
-    CHECK_NODE="$(docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1)"
-    sleep 0.2
+
+    CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
+
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
         docker run -it -d --name="${BASE_NAME}1" \
