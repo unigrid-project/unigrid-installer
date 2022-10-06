@@ -969,7 +969,7 @@ CREATE_CRONTAB_JOB() {
   crontab rebootcron
   crontab -l > rebootcron
   echo "new cron into cron file"
-  echo "@reboot /usr/local/bin/ugd_service.sh start" >> rebootcron
+  echo "@reboot /usr/local/bin/ugd_service start" >> rebootcron
   echo ""
   echo "install new cron file"
   crontab rebootcron
