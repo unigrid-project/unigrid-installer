@@ -963,11 +963,14 @@ fi
 
 CREATE_CRONTAB_JOB() {
   echo "write out current crontab"
+  touch /var/spool/cron/root
+  /usr/bin/crontab /var/spool/cron/root
   touch rebootcron
   crontab rebootcron
   crontab -l > rebootcron
   echo "new cron into cron file"
   echo "@reboot /usr/local/bin/service.sh start" >> rebootcron
+  echo ""
   echo "install new cron file"
   crontab rebootcron
   rm rebootcron
@@ -982,7 +985,7 @@ UNIGRID_SETUP_THREAD () {
     DAEMON_DOWNLOAD_SUPER "${DAEMON_REPO}" "${BIN_BASE}" "${DAEMON_DOWNLOAD}" force
     GROUNDHOG_DOWNLOAD_SUPER "${GROUNDHOG_REPO}" "${GROUNDHOG_BASE}" "${GROUNDHOG_DOWNLOAD}" force
     MOVE_FILES_SETOWNER
-    #CREATE_CRONTAB_JOB
+    CREATE_CRONTAB_JOB
     stty sane 2>/dev/null
     ASCII_ART
 

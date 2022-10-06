@@ -146,6 +146,8 @@ do
 done
 echo -e "${GREEN}Unigrid daemon fully synced!"
 
+# docker exec -i e465a15e74af ugd_service status
+
 
 echo
 echo -e "${CYAN}Completed Docker Install Script."

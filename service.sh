@@ -21,6 +21,23 @@ CLI='/usr/local/bin/unigrid-cli'
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+TEST_RESPONSE='{
+  "status": "complete",
+  "walletstatus": "Done loading",
+  "progress": 0
+}'
+
+function CHECK_IF_RUNNING() {
+      GROUNDHOG=$(pgrep groundhog)
+      echo ${GROUNDHOG}
+
+      if [ "${GROUNDHOG}" != "" ]; then
+      echo -e "${TEST_RESPONSE}"
+      fi
+}
+
+
+CHECK_IF_RUNNING
 
 case "$1" in
   start)
@@ -36,11 +53,15 @@ case "$1" in
   restart)
         echo -n "Restarting daemon: "$NAME
         start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $PIDFILE
-        start-stop-daemon --start --quiet -b -m --pidfile $PIDFILE --chuid $USER --exec $DAEMON 
+        sleep 0.3
+        start-stop-daemon --start --quiet -b -m --pidfile $PIDFILE --chuid $USER --exec $DAEMON $DAEMON_OPTS
         echo "."
         ;;
   unigrid)
-        echo -n `($CLI $2 $3 $4 $5)`
+        echo -e "`($CLI $2 $3 $4 $5)`"
+        ;;
+  unigrid)
+        CHECK_IF_RUNNING
         ;;
   status)
         status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
