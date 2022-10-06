@@ -27,7 +27,6 @@ SERVER_NAME=''
 DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
 NODE_NUMBER=''
-WATCHTOWER_INSTALLED=true
 SP="/-\\|"
 
 INSTALL_DOCKER() {
@@ -69,16 +68,6 @@ CHECK_FOR_NODE_INSTALL() {
         DOCKERS="${BASE_NAME}0"
         ARRAY=($(echo ${DOCKERS}))
     fi
-
-    for s in "${ARR[@]}"; do
-        if [[ "$s" = 'watchtower' ]]; then
-            WATCHTOWER_INSTALLED=true
-        else
-            WATCHTOWER_INSTALLED=false
-        fi
-        ITEM="$(echo ${s} | cut -d'_' -f3)"
-        NUMBERS_ARRAY+=("$ITEM")
-    done
 }
 
 
@@ -120,7 +109,8 @@ INSTALL_NEW_NODE() {
 
 INSTALL_WATCHTOWER() {
     # Run watchtower if not found
-    if [ "$WATCHTOWER_INSTALLED" = true ]; then
+    CHECK_WATCHTOWER="$( docker ps -f name=watchtower | grep -w watchtower )"
+     if [ -z  "${CHECK_WATCHTOWER}" ]; then
         echo -e "${GREEN}Installing watchtower"
         docker run -d \
             --name watchtower \
@@ -137,7 +127,7 @@ INSTALL_COMPLETE() {
     echo "${CURRENT_CONTAINER_ID}"
     docker start "${CURRENT_CONTAINER_ID}"
     echo e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
-    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
     #sleep 1.5
 
