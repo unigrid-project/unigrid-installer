@@ -26,12 +26,13 @@ BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
+NODE_NUMBER=''
 WATCHTOWER_INSTALLED=true
 SP="/-\\|"
 
 INSTALL_DOCKER() {
     if [ ! -x "$(command -v docker)" ]; then
-        echo "${CYAN}Starting Docker Instll Script"
+        echo -e "${CYAN}Starting Docker Instll Script"
         bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
         sudo chmod 666 /var/run/docker.sock
         sudo groupadd docker
@@ -48,7 +49,7 @@ CHECK_FOR_NODE_INSTALL() {
     CHECK_NODE="$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )"
     echo "ugd_docker_1: ${CHECK_NODE}"
     if [ -z  "${CHECK_NODE}" ]; then
-        echo "${GREEN}Clean install docker image"
+        echo -e "${GREEN}Clean install docker image"
         docker run -it -d --name="${BASE_NAME}1" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
             --restart unless-stopped \
@@ -57,9 +58,6 @@ CHECK_FOR_NODE_INSTALL() {
         echo -e "${CYAN}1st node already installed"
         INSTALL_NEW_NODE
     fi
-}
-
-INSTALL_NEW_NODE() {
     # Get all of the images names
     SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
     #DOCKERS=""
@@ -81,6 +79,10 @@ INSTALL_NEW_NODE() {
         ITEM="$(echo ${s} | cut -d'_' -f3)"
         NUMBERS_ARRAY+=("$ITEM")
     done
+}
+
+
+INSTALL_NEW_NODE() {
 
     #NUMBERS_ARRAY=("ugd_docker_0")
 
@@ -92,12 +94,12 @@ INSTALL_NEW_NODE() {
     fi
     echo ${ARRAY_LENGTH}
     LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH} - 1))]}
-    B="$(($LAST_DOCKER_NUMBER + 1))"
+    NODE_NUMBER="$(($LAST_DOCKER_NUMBER + 1))"
 
     ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 
-    NEW_SERVER_NAME=${BASE_NAME}${B}
-    NEW_VOLUME_NAME=${DATA_VOLUME}${B}
+    NEW_SERVER_NAME=${BASE_NAME}${NODE_NUMBER}
+    NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
     echo ${NEW_VOLUME_NAME}
 
     echo "Copy Volume and run"
@@ -106,7 +108,7 @@ INSTALL_NEW_NODE() {
         -d \
         -t \
         -v ${DATA_VOLUME}1:/from \
-        -v ${DATA_VOLUME}${B}:/to \
+        -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
     echo "Done copying volume"
     docker run -it -d --name="${NEW_SERVER_NAME}" \
@@ -119,7 +121,7 @@ INSTALL_NEW_NODE() {
 INSTALL_WATCHTOWER() {
     # Run watchtower if not found
     if [ "$WATCHTOWER_INSTALLED" = true ]; then
-        echo "${GREEN}Installing watchtower"
+        echo -e "${GREEN}Installing watchtower"
         docker run -d \
             --name watchtower \
             -v /var/run/docker.sock:/var/run/docker.sock \
@@ -134,7 +136,7 @@ INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
     echo "${CURRENT_CONTAINER_ID}"
     docker start "${CURRENT_CONTAINER_ID}"
-    echo "Starting ${CURRENT_CONTAINER_ID}"
+    echo e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
     #sleep 1.5
@@ -151,7 +153,7 @@ INSTALL_COMPLETE() {
         sleep 0.1
         BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
         sleep 0.1
-        echo -en "\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
+        echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
         #seq 1 1000000 | while read i; do echo -en "\r$i"; done
         stty sane 2>/dev/null
         sleep 5
