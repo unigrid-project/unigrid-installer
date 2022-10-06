@@ -131,6 +131,7 @@ docker run --rm \
 echo "Done copying volume"
 docker run -it -d --name="${NEW_SERVER_NAME}" \
     --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
+    --restart unless-stopped \
     unigrid/unigrid:beta # /usr/local/bin/ugd_service start
 fi
 
