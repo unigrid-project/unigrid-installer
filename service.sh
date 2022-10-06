@@ -20,7 +20,6 @@ CLI='/usr/local/bin/unigrid-cli'
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
-export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 TEST_RESPONSE='{
   "status": "complete",
   "walletstatus": "Done loading",
@@ -62,7 +61,7 @@ case "$1" in
   unigrid)
         echo -e "`($CLI $2 $3 $4 $5)`"
         ;;
-  unigrid)
+  check)
         CHECK_IF_RUNNING
         ;;
   status)
