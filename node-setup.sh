@@ -28,7 +28,8 @@ DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
 NODE_NUMBER=''
 SP="/-\\|"
-NEW_SERVER_NAME=''
+# setting a default name here
+NEW_SERVER_NAME='ugd_docker_1'
 
 INSTALL_DOCKER() {
     if [ ! -x "$(command -v docker)" ]; then
