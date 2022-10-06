@@ -54,11 +54,13 @@ SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
 #DOCKERS=""
 DOCKERS=${SERVER_NAME}
 ARRAY=(`echo ${DOCKERS}`);
-echo ${ARRAY}
-######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
-#ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($ARRAY)"
-if [ "${#ARR[@]}" != "0" ]; then
+
+if [ "${#ARR[@]}" = "0" ]; then
+DOCKERS=${BASE_NAME}0
+ARRAY=(`echo ${DOCKERS}`);
+fi
+
 for s in "${ARR[@]}"; do
     if [[ "$s" = 'watchtower' ]] 
     then
@@ -69,7 +71,7 @@ for s in "${ARR[@]}"; do
     ITEM="$(echo ${s} | cut -d'_' -f3)"
     NUMBERS_ARRAY+=( "$ITEM" )
 done
-fi
+
 # Run watchtower if not found
 if [ "$WATCHTOWER_INSTALLED" = true ] ; then
     echo "${GREEN}Installing watchtower"
@@ -81,21 +83,26 @@ if [ "$WATCHTOWER_INSTALLED" = true ] ; then
 fi
 
 NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-
 ARRAY_LENGTH="$(echo ${#NUMBERS_ARRAY[@]})"
 LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
+B="$(($LAST_DOCKER_NUMBER + 1))"
 
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 
-B="$(($LAST_DOCKER_NUMBER + 1))"
+
 NEW_SERVER_NAME=${BASE_NAME}${B}
 # Get all of the volumes names
 VOLUME_NAMES=$(docker ps -a --no-trunc --format '{{.Mounts}}')
 VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
 
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
-#ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($VOLUME_ARRAY)"
+if [ "${#ARR[@]}" = "0" ]; then
+VOLUME_NAMES=${BASE_NAME}0
+VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
+fi
+
+
 for s in "${ARR[@]}"; do 
     ITEM="$(echo ${s} | cut -d'_' -f3)"
     NUMBERS_ARRAY+=( "$ITEM" )
