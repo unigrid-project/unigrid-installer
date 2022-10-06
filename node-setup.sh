@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # shellcheck disable=SC2034
 # Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
@@ -30,167 +29,162 @@ NUMBERS_ARRAY=()
 WATCHTOWER_INSTALLED=true
 SP="/-\\|"
 
-echo "Starting Docker Instll Script"
-
-
-if [ ! -x "$( command -v docker )" ]
-then
-bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
-sudo chmod 666 /var/run/docker.sock
-sudo groupadd docker
-CURRENT_USER=$(whoami)
-echo ${CURRENT_USER}
-sudo usermod -a -G docker ${CURRENT_USER}
-echo "Completed Docker Install"
-fi
-
-if [ -x '$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )' ]
-then
-    echo "${GREEN}Clean install docker image"
-    docker run -it -d --name="${BASE_NAME}1" \
-    --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
-    --restart unless-stopped \
-    unigrid/unigrid:beta
-else
-# Get all of the images names
-SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
-#DOCKERS=""
-DOCKERS=${SERVER_NAME}
-ARRAY=(`echo ${DOCKERS}`);
-eval "ARR=($ARRAY)"
-
-if [ "${#ARR[@]}" = "0" ]; then
-DOCKERS="${BASE_NAME}0"
-ARRAY=(`echo ${DOCKERS}`);
-fi
-
-for s in "${ARR[@]}"; do
-    if [[ "$s" = 'watchtower' ]] 
-    then
-        WATCHTOWER_INSTALLED=true
+INSTALL_DOCKER() {
+    if [ ! -x "$(command -v docker)" ]; then
+        echo "${CYAN}Starting Docker Instll Script"
+        bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
+        sudo chmod 666 /var/run/docker.sock
+        sudo groupadd docker
+        CURRENT_USER=$(whoami)
+        echo ${CURRENT_USER}
+        sudo usermod -a -G docker ${CURRENT_USER}
+        echo -e "${CYAN}Completed Docker Install"
     else
-        WATCHTOWER_INSTALLED=false 
+        echo -e "${CYAN}Docker already installed"
     fi
-    ITEM="$(echo ${s} | cut -d'_' -f3)"
-    NUMBERS_ARRAY+=( "$ITEM" )
-done
+}
 
-#NUMBERS_ARRAY=("ugd_docker_0")
+CHECK_FOR_NODE_INSTALL() {
+    if [ -x '$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )' ]; then
+        echo "${GREEN}Clean install docker image"
+        docker run -it -d --name="${BASE_NAME}1" \
+            --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
+            --restart unless-stopped \
+            unigrid/unigrid:beta
+    else
+        echo -e "${CYAN}1st node already installed"
+        INSTALL_NEW_NODE
+    fi
+}
 
-NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
-ARRAY_LENGTH='1'
-else
-ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
-fi
-echo ${ARRAY_LENGTH}
-LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
-B="$(($LAST_DOCKER_NUMBER + 1))"
+INSTALL_NEW_NODE() {
+    # Get all of the images names
+    SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}')
+    #DOCKERS=""
+    DOCKERS=${SERVER_NAME}
+    ARRAY=($(echo ${DOCKERS}))
+    eval "ARR=($ARRAY)"
 
-######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
+    if [ "${#ARR[@]}" = "0" ]; then
+        DOCKERS="${BASE_NAME}0"
+        ARRAY=($(echo ${DOCKERS}))
+    fi
 
+    for s in "${ARR[@]}"; do
+        if [[ "$s" = 'watchtower' ]]; then
+            WATCHTOWER_INSTALLED=true
+        else
+            WATCHTOWER_INSTALLED=false
+        fi
+        ITEM="$(echo ${s} | cut -d'_' -f3)"
+        NUMBERS_ARRAY+=("$ITEM")
+    done
 
-NEW_SERVER_NAME=${BASE_NAME}${B}
-# Get all of the volumes names
-VOLUME_NAMES=$(docker ps -a --no-trunc --format '{{.Mounts}}')
-VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
+    #NUMBERS_ARRAY=("ugd_docker_0")
 
-######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
-eval "ARR=($VOLUME_ARRAY)"
-if [ "${#ARR[@]}" = "0" ]; then
-VOLUME_NAMES="${BASE_NAME}0"
-VOLUME_ARRAY=(`echo ${VOLUME_NAMES}`);
-fi
+    NUMBERS_ARRAY=($(printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n))
+    if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
+        ARRAY_LENGTH='1'
+    else
+        ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
+    fi
+    echo ${ARRAY_LENGTH}
+    LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH} - 1))]}
+    B="$(($LAST_DOCKER_NUMBER + 1))"
 
+    ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 
-for s in "${ARR[@]}"; do 
-    ITEM="$(echo ${s} | cut -d'_' -f3)"
-    NUMBERS_ARRAY+=( "$ITEM" )
-done
-NUMBERS_ARRAY=( $( printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n ) )
-ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
-LAST_VOLUME_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH}-1))]}
+    NEW_SERVER_NAME=${BASE_NAME}${B}
+    NEW_VOLUME_NAME=${DATA_VOLUME}${B}
+    echo ${NEW_VOLUME_NAME}
 
-######### GET HIGHEST NUMBER IN THE ARRAY FOR VOLUMES ##########
+    echo "Copy Volume and run"
+    docker run --rm \
+        -i \
+        -d \
+        -t \
+        -v ${DATA_VOLUME}1:/from \
+        -v ${DATA_VOLUME}${B}:/to \
+        alpine ash -c "cd /from ; cp -av . /to"
+    echo "Done copying volume"
+    docker run -it -d --name="${NEW_SERVER_NAME}" \
+        --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
+        --restart unless-stopped \
+        unigrid/unigrid:beta # /usr/local/bin/ugd_service start
 
-B="$(($LAST_VOLUME_NUMBER + 1))"
-NEW_VOLUME_NAME=${DATA_VOLUME}${B}
-echo ${NEW_VOLUME_NAME}
+}
 
-echo "Copy Volume and run"
-docker run --rm \
-           -i \
-           -d \
-           -t \
-           -v ${DATA_VOLUME}1:/from \
-           -v ${DATA_VOLUME}${B}:/to \
-           alpine ash -c "cd /from ; cp -av . /to"
-echo "Done copying volume"
-docker run -it -d --name="${NEW_SERVER_NAME}" \
-    --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
-    --restart unless-stopped \
-    unigrid/unigrid:beta # /usr/local/bin/ugd_service start
-fi
+INSTALL_WATCHTOWER() {
+    # Run watchtower if not found
+    if [ "$WATCHTOWER_INSTALLED" = true ]; then
+        echo "${GREEN}Installing watchtower"
+        docker run -d \
+            --name watchtower \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            containrrr/watchtower --debug -c \
+            --trace --include-restarting --interval 30
+    else
+        echo -e "${CYAN}Watchtower already intalled... skipping"
+    fi
+}
 
-# Run watchtower if not found
-if [ "$WATCHTOWER_INSTALLED" = true ] ; then
-    echo "${GREEN}Installing watchtower"
-    docker run -d \
-        --name watchtower \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        containrrr/watchtower --debug -c \
-        --trace --include-restarting --interval 30
-fi
+INSTALL_COMPLETE() {
+    CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
+    echo "${CURRENT_CONTAINER_ID}"
+    docker start "${CURRENT_CONTAINER_ID}"
+    echo "Starting ${CURRENT_CONTAINER_ID}"
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
-CURRENT_CONTAINER_ID=$( echo `sudo docker ps -aqf name="${NEW_SERVER_NAME}"` )
-echo "${CURRENT_CONTAINER_ID}"
-docker start "${CURRENT_CONTAINER_ID}"
-echo "Starting ${CURRENT_CONTAINER_ID}"
-docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    #sleep 1.5
 
-#sleep 1.5
+    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
+    sleep 1
+    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
 
-#docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
-sleep 1
-# docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
-
-# FOR LOOP TO CHECK CHAIN IS SYNCED
-BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-sleep 0.5
-while [[ "$BLOCK_COUNT" = "-1" ]]
-do
+    # FOR LOOP TO CHECK CHAIN IS SYNCED
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-    sleep 0.1
-    BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
-    sleep 0.1
-    echo -en "\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
-    #seq 1 1000000 | while read i; do echo -en "\r$i"; done
-    stty sane 2>/dev/null
-    sleep 5
-done
-echo -e "${GREEN}Unigrid daemon fully synced!"
+    sleep 0.5
+    while [[ "$BLOCK_COUNT" = "-1" ]]; do
+        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+        sleep 0.1
+        BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
+        sleep 0.1
+        echo -en "\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
+        #seq 1 1000000 | while read i; do echo -en "\r$i"; done
+        stty sane 2>/dev/null
+        sleep 5
+    done
+    echo -e "${GREEN}Unigrid daemon fully synced!"
+    echo
+    echo -e "${CYAN}Completed Docker Install Script."
+    echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
+    echo -e "${CYAN}To call the unigrid daemon use..."
+    echo
+    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid help"
+    echo
+    echo -e "${CYAN}To access the container you can type..."
+    echo
+    echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
+    echo
+    echo -e "${CYAN}To see a full list of all containers use..."
+    echo
+    echo -e "${GREEN}docker ps"
+    echo
+    echo -e "${CYAN}For help"
+    echo
+    echo -e "${GREEN}docker --help"
+    echo
+    echo -e "${CYAN}If you would like to install another node simply run this script again."
+    echo
+}
 
 #docker exec -i 788d300261d3 ugd_service status
 #docker container exec -it 788d300261d3 /bin/bash
 
-echo
-echo -e "${CYAN}Completed Docker Install Script."
-echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!" 
-echo -e "${CYAN}To call the unigrid daemon use..."
-echo
-echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid help"
-echo
-echo -e "${CYAN}To access the container you can type..."
-echo
-echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
-echo
-echo -e "${CYAN}To see a full list of all containers use..."
-echo
-echo -e "${GREEN}docker ps"
-echo
-echo -e "${CYAN}For help"
-echo
-echo -e "${GREEN}docker --help"
-echo
-echo -e "${CYAN}If you would like to install another node simply run this script again."
-echo
+INSTALL_DOCKER
+
+CHECK_FOR_NODE_INSTALL
+
+INSTALL_WATCHTOWER
+
+INSTALL_COMPLETE
