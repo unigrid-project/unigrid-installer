@@ -45,7 +45,9 @@ INSTALL_DOCKER() {
 }
 
 CHECK_FOR_NODE_INSTALL() {
-    if [ -x '$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )' ]; then
+    CHECK_NODE="$( docker ps -f name=ugd_docker_1 | grep -w ugd_docker_1 )"
+    echo "ugd_docker_1: ${CHECK_NODE}"
+    if [ -z  "${CHECK_NODE}" ]; then
         echo "${GREEN}Clean install docker image"
         docker run -it -d --name="${BASE_NAME}1" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
