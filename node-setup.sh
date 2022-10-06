@@ -28,6 +28,7 @@ DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
 NODE_NUMBER=''
 SP="/-\\|"
+NEW_SERVER_NAME=''
 
 INSTALL_DOCKER() {
     if [ ! -x "$(command -v docker)" ]; then
