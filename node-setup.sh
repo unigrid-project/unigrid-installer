@@ -28,6 +28,7 @@ SERVER_NAME=''
 DATA_VOLUME='data_volume_'
 NUMBERS_ARRAY=()
 WATCHTOWER_INSTALLED=true
+SP="/-\\|"
 
 echo "Starting Docker Instll Script"
 
@@ -162,7 +163,8 @@ do
     sleep 0.1
     BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
     sleep 0.1
-    echo -e "\\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING} \\c/r\033[K"
+    echo -en "\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
+    #seq 1 1000000 | while read i; do echo -en "\r$i"; done
     stty sane 2>/dev/null
     sleep 5
 done
