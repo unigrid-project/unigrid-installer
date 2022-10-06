@@ -65,6 +65,7 @@ CHECK_FOR_NODE_INSTALL() {
 INSTALL_NEW_NODE() {
     # Get all of the images names
     SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
+    sleep 0.1
     declare -a ARR=( $SERVER_NAME )
 
     for s in "${ARR[@]}"; do
@@ -108,6 +109,7 @@ INSTALL_NEW_NODE() {
 INSTALL_WATCHTOWER() {
     # Run watchtower if not found
     CHECK_WATCHTOWER="$(docker ps -f name=watchtower | grep -w watchtower)"
+    sleep 0.1
     if [ -z "${CHECK_WATCHTOWER}" ]; then
         echo -e "${GREEN}Installing watchtower"
         docker run -d \
