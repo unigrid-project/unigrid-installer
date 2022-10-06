@@ -58,6 +58,7 @@ echo ${ARRAY}
 ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
 #ARRAY=("ugd_docker_2 ugd_docker_5 ugd_docker_1 ugd_docker_10 ugd_docker_7")
 eval "ARR=($ARRAY)"
+if [ "${#ARR[@]}" != "0" ]; then
 for s in "${ARR[@]}"; do
     if [[ "$s" = 'watchtower' ]] 
     then
@@ -68,7 +69,7 @@ for s in "${ARR[@]}"; do
     ITEM="$(echo ${s} | cut -d'_' -f3)"
     NUMBERS_ARRAY+=( "$ITEM" )
 done
-
+fi
 # Run watchtower if not found
 if [ "$WATCHTOWER_INSTALLED" = true ] ; then
     echo "${GREEN}Installing watchtower"
