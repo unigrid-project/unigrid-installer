@@ -147,9 +147,9 @@ docker start "${CURRENT_CONTAINER_ID}"
 echo "Starting ${CURRENT_CONTAINER_ID}"
 docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
 
-sleep 1.5
+#sleep 1.5
 
-docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
+#docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
 sleep 1
 # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
 
@@ -161,7 +161,9 @@ do
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
     sleep 0.1
     BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
+    sleep 0.1
     echo -e "\\r${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING} \\c/r\033[K"
+    stty sane 2>/dev/null
     sleep 5
 done
 echo -e "${GREEN}Unigrid daemon fully synced!"
