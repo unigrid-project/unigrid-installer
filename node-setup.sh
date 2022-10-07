@@ -51,10 +51,14 @@ PRE_INSTALL_CHECK() {
         echo "And then re-run this command."
         return 1 2>/dev/null || exit 1
     fi
-    if [ ! -x "$(command -v jq)" ]; then
+    if [ ! -x "$(command -v jq)" ] ||
+        [ ! -x "$(command -v ufw)" ]; then
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
-            jq
+            jq \
+            ufw
     fi
+
+    # Setup UFW and find an open port
 }
 
 INSTALL_DOCKER() {
@@ -182,11 +186,13 @@ INSTALL_COMPLETE() {
             STATUS=$(jq -r '.walletstatus' data.json)
             echo -en "\\r${GREEN}${SP:i++%${#SP}:1} Unigrid sync status... Task: ${TASK} Status: ${STATUS} Progress: ${PROGRESS} \\c/r\033[K"
             sleep 0.3
-            if [[ "$STATUS" = "complete" && "${PROGRESS}" = 100 ]]; then
-                BLOCK_COUNT='1'
+            if [[ "$TASK" = "complete" && "${PROGRESS}" = 100 ]]; then
+                echo
+                break
             fi
             true >data.json
         done
+        echo -e "${CYAN}Loading the Unigrid backend..."
         rm -f data.json
     fi
 
