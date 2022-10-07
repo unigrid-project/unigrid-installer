@@ -177,7 +177,6 @@ INSTALL_COMPLETE() {
             tput cuu1
             tput cuu1
             tput cuu1
-            tput cuu1
         done
     fi
 
