@@ -140,7 +140,9 @@ INSTALL_COMPLETE() {
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
         sleep 0.5
+        tput sc
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
+            tput ed
             BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
             sleep 0.1
             BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
@@ -148,7 +150,8 @@ INSTALL_COMPLETE() {
             echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
             #seq 1 1000000 | while read i; do echo -en "\r$i"; done
             stty sane 2>/dev/null
-            sleep 5
+            sleep 2.5
+            tput rc
         done
     fi
 
