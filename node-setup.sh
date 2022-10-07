@@ -42,6 +42,15 @@ NEW_SERVER_NAME='ugd_docker_1'
 CAN_SUDO=0
 TXID=()
 TX_DETAILS=()
+USR_HOME='/root'
+DIRECTORY='.unigrid'
+CONF='unigrid.conf'
+PORTA='0'
+PORTB='0'
+CURRENT_CONTAINER_ID=''
+PRIVATEADDRESS="127.0.0.1"
+# Regex to check if output is a number.
+RE='^[0-9]+$'
 
 PRE_INSTALL_CHECK() {
     # Check for sudo
@@ -63,14 +72,32 @@ PRE_INSTALL_CHECK() {
         return 1 2>/dev/null || exit 1
     fi
     if [ ! -x "$(command -v jq)" ] ||
-        [ ! -x "$(command -v ufw)" ]; then
+        [ ! -x "$(command -v ufw)" ] ||
+        [ ! -x "$(command -v pwgen)" ]; then
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
             jq \
-            ufw
+            ufw \
+            pwgen
     fi
 
-    # Setup UFW and find an open port
+    # Setup UFW
+    # Turn on firewall, allow ssh port first; default is 22.
+    SSH_PORT=22
+    SSH_PORT_SETTING=$(sudo grep -E '^Port [0-9]*' /etc/ssh/ssh_config | grep -o '[0-9]*' | head -n 1)
+    if [[ ! -z "${SSH_PORT_SETTING}" ]] && [[ $SSH_PORT_SETTING =~ $RE ]]; then
+        sudo ufw allow "${SSH_PORT_SETTING}" >/dev/null 2>&1
+    else
+        sudo ufw allow "${SSH_PORT}" >/dev/null 2>&1
+    fi
+    if [[ -f "${HOME}/.ssh/config" ]]; then
+        SSH_PORT_SETTING=$(grep -E '^Port [0-9]*' "${HOME}/.ssh/config" | grep -o '[0-9]*' | head -n 1)
+        if [[ ! -z "${SSH_PORT_SETTING}" ]] && [[ $SSH_PORT_SETTING =~ $RE ]]; then
+            sudo ufw allow "${SSH_PORT_SETTING}" >/dev/null 2>&1
+        fi
+    fi
 
+    echo "y" | sudo ufw enable >/dev/null 2>&1
+    sudo ufw reload
 }
 
 GET_TXID() {
@@ -210,6 +237,157 @@ INSTALL_WATCHTOWER() {
     fi
 }
 
+IS_PORT_OPEN() {
+    PRIVIPADDRESS=${1}
+    PORT_TO_TEST=${2}
+    BIND=${3}
+    VERBOSE=${4}
+    INET=${5}
+    PUB_IPADDRESS=${6}
+
+    if [[ -z "${BIND}" ]]; then
+        if [[ ${PRIVIPADDRESS} =~ .*:.* ]]; then
+            PRIVIPADDRESS_SHORT=$(sipcalc "${PRIVIPADDRESS}" | grep -iF 'Compressed address' | cut -d '-' -f2 | awk '{print $1}')
+            BIND="\[${PRIVIPADDRESS_SHORT}\]:${PORT_TO_TEST}"
+        else
+            BIND="${PRIVIPADDRESS}:${PORT_TO_TEST}"
+        fi
+    fi
+    # see if port is used.
+    PORTS_USED=$(sudo -n ss -lpn 2>/dev/null | grep -P "${BIND} ")
+    # see if netcat can bind to port.
+    # shellcheck disable=SC2009
+    NETCAT_PIDS=$(ps -aux | grep -E '[n]etcat.*\-p.*\-l' | awk '{print $2}')
+    # Clean start for netcat test.
+    while read -r NETCAT_PID; do
+        kill -9 "${NETCAT_PID}" >/dev/null 2>&1
+    done <<<"${NETCAT_PIDS}"
+    NETCAT_TEST=$(sudo -n timeout --signal=SIGKILL 0.3s netcat -p "${PORT_TO_TEST}" -l "${PRIVIPADDRESS}" 2>&1)
+    NETCAT_PID=$!
+    kill -9 "${NETCAT_PID}" >/dev/null 2>&1
+    sleep 0.1
+    # Clean up after.
+    # shellcheck disable=SC2009
+    NETCAT_PIDS=$(ps -aux | grep -E '[n]etcat.*\-p.*\-l' | awk '{print $2}')
+    while read -r NETCAT_PID; do
+        kill -9 "${NETCAT_PID}" >/dev/null 2>&1
+    done <<<"${NETCAT_PIDS}"
+    #if [[ "${VERBOSE}" -eq 1 ]]
+    #then
+    echo
+    echo "${INET} ${PUB_IPADDRESS} ${PRIVIPADDRESS}:${PORT_TO_TEST}"
+    echo "netcat test"
+    echo "${NETCAT_TEST}"
+    echo "ports in use test"
+    echo "${PORTS_USED}"
+    # echo 0 if port is not open.
+    if [[ "${#PORTS_USED}" -gt 10 ]] || [[ $(echo "${NETCAT_TEST}" | grep -ci 'in use') -gt 0 ]]; then
+        echo "0"
+    else
+        echo "${PORT_TO_TEST}"
+    fi
+}
+
+FIND_FREE_PORT() {
+    PRIVIPADDRESS=${1}
+    if [[ -r /proc/sys/net/ipv4/ip_local_port_range ]]; then
+        read -r LOWERPORT UPPERPORT </proc/sys/net/ipv4/ip_local_port_range
+    fi
+    if [[ ! $LOWERPORT =~ $RE ]] || [[ ! $UPPERPORT =~ $RE ]]; then
+        read -r LOWERPORT UPPERPORT <<<"$(sudo sysctl net.ipv4.ip_local_port_range | cut -d '=' -f2)"
+    fi
+    if [[ ! $LOWERPORT =~ $RE ]] || [[ ! $UPPERPORT =~ $RE ]]; then
+        LOWERPORT=32769
+        UPPERPORT=60998
+    fi
+    #IS_PORT_OPEN ${PRIVIPADDRESS} ${PORT_TO_TEST}
+    LAST_PORT=0
+    while :; do
+        PORT_TO_TEST=$(shuf -i "${LOWERPORT}"-"${UPPERPORT}" -n 1)
+        while [[ "${LAST_PORT}" == "${PORT_TO_TEST}" ]]; do
+            PORT_TO_TEST=$(shuf -i "${LOWERPORT}"-"${UPPERPORT}" -n 1)
+            sleep 0.3
+        done
+        LAST_PORT="${PORT_TO_TEST}"
+        IS_PORT_OPEN ${PRIVIPADDRESS} ${PORT_TO_TEST}
+        if [[ $(IS_PORT_OPEN "${PRIVIPADDRESS}" "${PORT_TO_TEST}" | tail -n 1) -eq 0 ]]; then
+            continue
+        fi
+        if [[ $(IS_PORT_OPEN "127.0.0.1" "${PORT_TO_TEST}" | tail -n 1) -eq 0 ]]; then
+            continue
+        fi
+        if [[ $(IS_PORT_OPEN "0.0.0.0" "${PORT_TO_TEST}" | tail -n 1) -eq 0 ]]; then
+            continue
+        fi
+        if [[ $(IS_PORT_OPEN "::" "${PORT_TO_TEST}" "\[::.*\]:${PORT_TO_TEST}" | tail -n 1) -eq 0 ]]; then
+            continue
+        fi
+        break
+    done
+    #PORTB=$PORT_TO_TEST
+    echo "${PORT_TO_TEST}"
+}
+
+CREATE_CONF_FILE() {
+    # Generate random password.
+    if ! [ -x "$(command -v pwgen)" ]; then
+        PWA="$(openssl rand -hex 44)"
+    else
+        PWA="$(pwgen -1 -s 44)"
+    fi
+    PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
+
+    PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+
+    PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    # BASH PROMT
+    # while true; do
+    #     read -p "Do you wish to use port $PORTB? " yn
+    #     case $yn in
+    #     [Yy]*) exit ;;
+    #     [Nn]*) FIND_FREE_PORT ${PRIVATEADDRESS} ;;
+    #     *) echo "Please answer yes or no." ;;
+    #     esac
+    # done
+
+    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
+        sudo ufw allow "${PORTB}"
+    fi
+    echo "y" | sudo ufw enable >/dev/null 2>&1
+    sudo ufw reload
+
+    EXTERNALIP="${PUBIPADDRESS}:${PORTB}"
+    BIND="${PRIVIPADDRESS}:${PORTB}"
+    # Find open port.
+    echo "Searching for an unused port for rpc"
+    PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+
+    cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
+    rpcuser=${NEW_SERVER_NAME}_rpc
+    rpcpassword=${PWA}
+    rpcbind=127.0.0.1
+    rpcallowip=127.0.0.1
+    rpcport=${PORTB}
+    addnode=seed1.unigrid.org
+    addnode=seed2.unigrid.org
+    addnode=seed3.unigrid.org
+    addnode=seed4.unigrid.org
+    addnode=seed5.unigrid.org
+    addnode=seed6.unigrid.org
+    unigridstake=1
+    maxconnections=250
+    server=1
+    daemon=1
+    logtimestamps=1
+    listen=1
+    externalip=${EXTERNALIP}
+    bind=${BIND}
+    ${EXTRA_CONFIG}
+COIN_CONF
+    docker cp "${HOME}/${CONF}" CURRENT_CONTAINER_ID:/"${USR_HOME}/${DIRECTORY}/${CONF}"
+    rm -f "${HOME}/${CONF}"
+}
+
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
     docker start "${CURRENT_CONTAINER_ID}"
@@ -250,6 +428,11 @@ INSTALL_COMPLETE() {
         echo -e "${CYAN}Loading the Unigrid backend..."
         rm -f data.json
     fi
+    CREATE_CONF_FILE
+    sleep 1
+    # Restart the wallet
+    echo -e "${CYAN}Restarting the wallet with new conf file."
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
 
     echo -e "${GREEN}Unigrid daemon fully synced!"
     echo
@@ -277,9 +460,6 @@ INSTALL_COMPLETE() {
     echo
     stty sane 2>/dev/null
 }
-
-#docker exec -i 788d300261d3 ugd_service status
-#docker container exec -it 788d300261d3 /bin/bash
 
 PRE_INSTALL_CHECK
 
