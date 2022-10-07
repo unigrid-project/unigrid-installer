@@ -358,34 +358,35 @@ CREATE_CONF_FILE() {
     sudo ufw reload
 
     EXTERNALIP="${PUBIPADDRESS}:${PORTB}"
-    BIND="${PRIVIPADDRESS}:${PORTB}"
+    echo -e "EXTERNALIP: ${EXTERNALIP}"
+    BIND="${PRIVATEADDRESS}:${PORTB}"
     # Find open port.
     echo "Searching for an unused port for rpc"
     PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
 
-    cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
-    rpcuser=${NEW_SERVER_NAME}_rpc
-    rpcpassword=${PWA}
-    rpcbind=127.0.0.1
-    rpcallowip=127.0.0.1
-    rpcport=${PORTB}
-    addnode=seed1.unigrid.org
-    addnode=seed2.unigrid.org
-    addnode=seed3.unigrid.org
-    addnode=seed4.unigrid.org
-    addnode=seed5.unigrid.org
-    addnode=seed6.unigrid.org
-    unigridstake=1
-    maxconnections=250
-    server=1
-    daemon=1
-    logtimestamps=1
-    listen=1
-    externalip=${EXTERNALIP}
-    bind=${BIND}
-    ${EXTRA_CONFIG}
+cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
+rpcuser=${NEW_SERVER_NAME}_rpc
+rpcpassword=${PWA}
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+rpcport=${PORTB}
+addnode=seed1.unigrid.org
+addnode=seed2.unigrid.org
+addnode=seed3.unigrid.org
+addnode=seed4.unigrid.org
+addnode=seed5.unigrid.org
+addnode=seed6.unigrid.org
+unigridstake=1
+maxconnections=250
+server=1
+daemon=1
+logtimestamps=1
+listen=1
+externalip=${EXTERNALIP}
+bind=${BIND}
+${EXTRA_CONFIG}
 COIN_CONF
-    docker cp "${HOME}/${CONF}" CURRENT_CONTAINER_ID:/"${USR_HOME}/${DIRECTORY}/${CONF}"
+    docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
 
@@ -430,7 +431,7 @@ INSTALL_COMPLETE() {
         rm -f data.json
     fi
     CREATE_CONF_FILE
-    sleep 1
+    sleep 1.5
     # Restart the wallet
     echo -e "${CYAN}Restarting the wallet with new conf file."
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
