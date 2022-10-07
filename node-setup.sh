@@ -51,6 +51,10 @@ PRE_INSTALL_CHECK() {
         echo "And then re-run this command."
         return 1 2>/dev/null || exit 1
     fi
+    if [ ! -x "$(command -v jq)" ]; then
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+            jq
+    fi
 }
 
 INSTALL_DOCKER() {
@@ -151,11 +155,10 @@ INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
     echo "${CURRENT_CONTAINER_ID}"
     docker start "${CURRENT_CONTAINER_ID}"
-    echo e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
+    echo
+    echo -e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
-
     sleep 1.5
-
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
     sleep 1
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
@@ -164,20 +167,27 @@ INSTALL_COMPLETE() {
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
         sleep 0.5
+        touch data.json
+        PROGRESS=''
+        TASK=''
+        STATUS=''
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
             BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
             sleep 0.1
             BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
             sleep 0.1
-            echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
-            #seq 1 1000000 | while read i; do echo -en "\r$i"; done
-            sleep 2.5
-            tput cuu1
-            tput cuu1
-            tput cuu1
-            tput cuu1
-            tput cuu1
+            echo "${BOOT_STRAPPING}" >>data.json
+            PROGRESS=$(jq -r '.progress' data.json)
+            TASK=$(jq -r '.status' data.json)
+            STATUS=$(jq -r '.walletstatus' data.json)
+            echo -en "\\r${GREEN}${SP:i++%${#SP}:1} Unigrid sync status... Task: ${TASK} Status: ${STATUS} Progress: ${PROGRESS} \\c/r\033[K"
+            sleep 0.3
+            if [[ "$STATUS" = "complete" && "${PROGRESS}" = 100 ]]; then
+                BLOCK_COUNT='1'
+            fi
+            true >data.json
         done
+        rm -f data.json
     fi
 
     echo -e "${GREEN}Unigrid daemon fully synced!"
