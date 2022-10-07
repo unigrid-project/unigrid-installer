@@ -118,6 +118,6 @@ done
 UNIGRID_SETUP_THREAD
 )
 # shellcheck source=/root/.bashrc
-#. ~/.bashrc
+. ~/.bashrc
 #stty sane 2>/dev/null
 exit

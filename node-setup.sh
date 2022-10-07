@@ -17,7 +17,7 @@
 # Run this file
 
 ```
-sudo bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" 'source ~/.bashrc'
+bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" 'source ~/.bashrc'
 ```
 '
 CYAN='\033[0;36m'
@@ -30,16 +30,40 @@ NODE_NUMBER=''
 SP="/-\\|"
 # setting a default name here
 NEW_SERVER_NAME='ugd_docker_1'
+CAN_SUDO=0
+
+PRE_INSTALL_CHECK() {
+    # Check for sudo
+    # Check for bash
+    echo "Pre-install check"
+    # Only run if user has sudo.
+    sudo true >/dev/null 2>&1
+    USER_NAME_CURRENT=$(whoami)
+    CAN_SUDO=$(timeout --foreground --signal=SIGKILL 1s bash -c "sudo -l 2>/dev/null | grep -v '${USER_NAME_CURRENT}' | wc -l ")
+    if [[ ${CAN_SUDO} =~ ${RE} ]] && [[ "${CAN_SUDO}" -gt 2 ]]; then
+        :
+    else
+        echo "Script must be run as a user with no password sudo privileges"
+        echo "To switch to the root user type"
+        echo
+        echo "sudo su"
+        echo
+        echo "And then re-run this command."
+        return 1 2>/dev/null || exit 1
+    fi
+}
 
 INSTALL_DOCKER() {
+    # check docker info
     if [ ! -x "$(command -v docker)" ]; then
         echo -e "${CYAN}Starting Docker Instll Script"
         bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
-        sudo chmod 666 /var/run/docker.sock
+        #sudo chmod 666 /var/run/docker.sock
         sudo groupadd docker
         CURRENT_USER=$(whoami)
         echo ${CURRENT_USER}
         sudo usermod -a -G docker ${CURRENT_USER}
+        /bin/bash
         echo -e "${CYAN}Completed Docker Install"
     else
         echo -e "${CYAN}Docker already installed"
@@ -140,17 +164,20 @@ INSTALL_COMPLETE() {
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
         sleep 0.5
-        tput sc
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
             BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
             sleep 0.1
             BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
             sleep 0.1
-            tput ed
             echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
             #seq 1 1000000 | while read i; do echo -en "\r$i"; done
             sleep 2.5
-            tput rc
+            tput cuu1
+            tput cuu1
+            tput cuu1
+            tput cuu1
+            tput cuu1
+            tput cuu1
         done
     fi
 
@@ -181,6 +208,8 @@ INSTALL_COMPLETE() {
 
 #docker exec -i 788d300261d3 ugd_service status
 #docker container exec -it 788d300261d3 /bin/bash
+
+PRE_INSTALL_CHECK
 
 INSTALL_DOCKER
 
