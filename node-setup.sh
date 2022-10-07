@@ -142,14 +142,13 @@ INSTALL_COMPLETE() {
         sleep 0.5
         tput sc
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
-            tput ed
             BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
             sleep 0.1
             BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
             sleep 0.1
+            tput ed
             echo -en "\r${GREEN}${SP:i++%${#SP}:1} Waiting for wallet to sync... ${BOOT_STRAPPING}"
             #seq 1 1000000 | while read i; do echo -en "\r$i"; done
-            stty sane 2>/dev/null
             sleep 2.5
             tput rc
         done
