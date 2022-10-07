@@ -329,6 +329,7 @@ FIND_FREE_PORT() {
 }
 
 CREATE_CONF_FILE() {
+    echo -e "Generating the unigrid.conf file"
     # Generate random password.
     if ! [ -x "$(command -v pwgen)" ]; then
         PWA="$(openssl rand -hex 44)"
