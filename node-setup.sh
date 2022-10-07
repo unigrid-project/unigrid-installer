@@ -20,8 +20,17 @@
 bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" 'source ~/.bashrc'
 ```
 '
+
+EXPLORER_URL='http://explorer.unigrid.org/'
+EXPLORER_RAWTRANSACTION_PATH='api/getrawtransaction?txid='
+PATH_SUFFIX='&decrypt=1'
+COLLATERAL=3000
+COLLATERAL_NEW=2000
+SSL_BYPASS=''
 CYAN='\033[0;36m'
+BLUE="\033[1;34m"
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
@@ -31,6 +40,8 @@ SP="/-\\|"
 # setting a default name here
 NEW_SERVER_NAME='ugd_docker_1'
 CAN_SUDO=0
+TXID=()
+TX_DETAILS=()
 
 PRE_INSTALL_CHECK() {
     # Check for sudo
@@ -59,6 +70,50 @@ PRE_INSTALL_CHECK() {
     fi
 
     # Setup UFW and find an open port
+
+}
+
+GET_TXID() {
+    #get txid and check explorer
+    COLLATERAL=3000
+    CONFIRMED=0
+    MSG='Please enter the txid and output ID for your gridnode \n example: 149448f8c06cda10f1e7a30db5df0911cb7e3e6c1b8e3656c232f3caa3cb7965 0'
+    while [[ "${CONFIRMED}" = 0 ]]; do
+        echo -e "${CYAN}${MSG}"
+        read -p "txid & output ID:" TXID
+        TX_DETAILS=($TXID)
+        if [[ -z "${TX_DETAILS[0]}" || -z "${TX_DETAILS[1]}" ]]; then
+            MSG="${RED}Please enter both a txid and output ID"
+            continue
+        else
+            # Trim extra info.
+            TXHASH="$(echo -e "${TX_DETAILS[0]}" | sed 's/\://g' | sed 's/\"//g' | sed 's/,//g' | sed 's/txhash//g' | cut -d '-' -f1 | grep -o -w -E '[[:alnum:]]{64}')"
+            TXHASH_LENGTH=$(printf "%s" "${TXHASH}" | wc -m)
+
+            # TXID is not 64 char.
+            if [ "${TXHASH_LENGTH}" -ne 64 ]; then
+                echo
+                MSG="${RED}txid is not 64 characters long: ${TXHASH}."
+                echo
+                TXHASH=''
+                continue
+            else
+                URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
+                OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
+                echo -e "${CYAN}Checking the explorer for txid ${URL}"
+                #echo -e "${OUTPUTIDX_RAW}"
+                OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
+                if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
+                    echo -e "${GREEN}txid has ${COLLATERAL} collateral"
+                    echo -e "${GREEN}confirmed txid and output ID"
+                    CONFIRMED=1
+                else
+                    MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                fi
+                continue
+            fi
+        fi
+    done
 }
 
 INSTALL_DOCKER() {
@@ -157,10 +212,10 @@ INSTALL_WATCHTOWER() {
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
-    echo "${CURRENT_CONTAINER_ID}"
     docker start "${CURRENT_CONTAINER_ID}"
     echo
-    echo -e "${GREEN}Starting ${CURRENT_CONTAINER_ID}"
+    echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
+    echo
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
     sleep 1.5
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
@@ -218,6 +273,8 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
+    echo -e "${RED} Added ${TX_DETAILS} to grindode conf file."
+    echo
     stty sane 2>/dev/null
 }
 
@@ -225,6 +282,8 @@ INSTALL_COMPLETE() {
 #docker container exec -it 788d300261d3 /bin/bash
 
 PRE_INSTALL_CHECK
+
+GET_TXID
 
 INSTALL_DOCKER
 
