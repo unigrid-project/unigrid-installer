@@ -162,10 +162,11 @@ INSTALL_DOCKER() {
         echo -e "${CYAN}Starting Docker Instll Script"
         bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
         #sudo chmod 666 /var/run/docker.sock
-        sudo groupadd docker
+        #sudo groupadd docker
         CURRENT_USER=$(whoami)
         echo ${CURRENT_USER}
-        sudo usermod -a -G docker ${CURRENT_USER}
+        sudo usermod -aG docker ${CURRENT_USER}
+        . ~/.bashrc
         /bin/bash
         echo -e "${CYAN}Completed Docker Install"
     else
