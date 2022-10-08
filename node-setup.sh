@@ -337,8 +337,8 @@ FIND_FREE_PORT() {
         fi
         break
     done
-    #PORTB=$PORT_TO_TEST
-    echo "${PORT_TO_TEST}"
+    PORTB=$PORT_TO_TEST
+    #echo "${PORT_TO_TEST}"
 }
 
 CREATE_CONF_FILE() {
@@ -353,9 +353,11 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
-    PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1
+    #PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    sleep 0.5
     echo -e "PORTB: ${PORTB}"
-    sleep 1
+
     #PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
     #echo -e "PORTA: ${PORTA}"
     #sleep 1
