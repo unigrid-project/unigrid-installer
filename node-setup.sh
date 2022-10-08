@@ -51,6 +51,7 @@ CURRENT_CONTAINER_ID=''
 PRIVATEADDRESS="127.0.0.1"
 # Regex to check if output is a number.
 RE='^[0-9]+$'
+GN_KEY=''
 
 PRE_INSTALL_CHECK() {
     # Check for sudo
@@ -73,11 +74,13 @@ PRE_INSTALL_CHECK() {
     fi
     if [ ! -x "$(command -v jq)" ] ||
         [ ! -x "$(command -v ufw)" ] ||
+        [ ! -x "$(command -v dig)" ] ||
         [ ! -x "$(command -v pwgen)" ]; then
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq \
             jq \
             ufw \
-            pwgen
+            pwgen \
+            dig
     fi
 
     # Setup UFW
@@ -139,6 +142,16 @@ GET_TXID() {
                 fi
                 continue
             fi
+        fi
+    done
+
+    MSG='Please enter your generated private key from the wallet.'
+    while [[ -z "${GN_KEY}" ]]; do
+        echo -e "${CYAN}${MSG}"
+        read -p "key:" GN_KEY
+        if [[ -z "${GN_KEY}" ]]; then
+            MSG="${RED}${MSG}"
+            continue
         fi
     done
 }
@@ -336,8 +349,10 @@ CREATE_CONF_FILE() {
     else
         PWA="$(pwgen -1 -s 44)"
     fi
+    echo - "generated rpc password: ${PWA}"
     PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
-
+    PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
+    echo -e "Public IP Address: ${PUBIPADDRESS}"
     PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
 
     PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
@@ -359,7 +374,8 @@ CREATE_CONF_FILE() {
 
     EXTERNALIP="${PUBIPADDRESS}:${PORTB}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
-    BIND="${PRIVATEADDRESS}:${PORTB}"
+    BIND="0.0.0.0" 
+    # :${PORTB}"
     # Find open port.
     echo "Searching for an unused port for rpc"
     PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
@@ -384,10 +400,10 @@ logtimestamps=1
 listen=1
 externalip=${EXTERNALIP}
 bind=${BIND}
-${EXTRA_CONFIG}
+masternodeprivkey="${GN_KEY}"
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
-    rm -f "${HOME}/${CONF}"
+    #rm -f "${HOME}/${CONF}"
 }
 
 INSTALL_COMPLETE() {
