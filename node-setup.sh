@@ -357,9 +357,9 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
 
-    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    done
+    # while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+    #     PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    # done
 
     echo -e "PORTB: ${PORTB}"
 
@@ -376,9 +376,9 @@ CREATE_CONF_FILE() {
     #     esac
     # done
 
-    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
-        sudo ufw allow "${PORTB}"
-    fi
+    # if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
+    #     sudo ufw allow "${PORTB}"
+    # fi
     # if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
     #     sudo ufw allow "${PORTA}"
     # fi
