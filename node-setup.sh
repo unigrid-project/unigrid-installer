@@ -447,7 +447,7 @@ INSTALL_COMPLETE() {
             PROGRESS=$(jq -r '.progress' data.json)
             TASK=$(jq -r '.status' data.json)
             STATUS=$(jq -r '.walletstatus' data.json)
-            echo -en "\\r${GREEN}${SP:i++%${#SP}:1} Unigrid sync status... Task: ${TASK} Status: ${STATUS} Progress: ${PROGRESS} \\c/r\033[K"
+            echo -en "\\r${GREEN}${SP:i++%${#SP}:1} Unigrid sync status... Task: ${TASK} Progress: ${PROGRESS} \\c/r\033[K"
             sleep 0.3
             if [[ "$TASK" = "complete" && "${PROGRESS}" = 100 ]]; then
                 echo
