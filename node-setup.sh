@@ -354,8 +354,8 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
 
-    while [[ -z "${PORTB}" ]]; do
-        PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
     done
 
     echo -e "PORTB: ${PORTB}"
@@ -376,18 +376,18 @@ CREATE_CONF_FILE() {
     if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
         sudo ufw allow "${PORTB}"
     fi
-    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
-        sudo ufw allow "${PORTA}"
-    fi
+    # if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
+    #     sudo ufw allow "${PORTA}"
+    # fi
     echo "y" | sudo ufw enable >/dev/null 2>&1
     sudo ufw reload
 
     EXTERNALIP="${PUBIPADDRESS}:${PORTB}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
-    BIND="0.0.0.0" 
+    BIND="0.0.0.0"
     # :${PORTB}"
 
-cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
+    cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
 rpcpassword=${PWA}
 rpcbind=127.0.0.1
