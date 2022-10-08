@@ -164,7 +164,7 @@ INSTALL_DOCKER() {
     if [ ! -x "$(command -v docker)" ]; then
         echo -e "${CYAN}Starting Docker Instll Script"
         bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
-        #sudo chmod 666 /var/run/docker.sock
+        sudo chmod 666 /var/run/docker.sock
         #sudo groupadd docker
         CURRENT_USER=$(whoami)
         echo ${CURRENT_USER}
