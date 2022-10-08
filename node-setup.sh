@@ -380,9 +380,6 @@ CREATE_CONF_FILE() {
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0" 
     # :${PORTB}"
-    # Find open port.
-    echo "Searching for an unused port for rpc"
-    PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
 
 cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
