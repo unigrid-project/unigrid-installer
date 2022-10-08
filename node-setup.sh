@@ -353,9 +353,11 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
-    FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1
-    #PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
-    sleep 0.5
+
+    while [[ -z "${PORTB}" ]]; do
+        PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    done
+
     echo -e "PORTB: ${PORTB}"
 
     #PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
