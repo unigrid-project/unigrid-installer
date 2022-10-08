@@ -141,6 +141,8 @@ GET_TXID() {
                 # else
                 #     MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
                 # fi
+                # TODO ADD COLLATERAL CHECK HERE
+                CONFIRMED=1
                 continue
             fi
         fi
