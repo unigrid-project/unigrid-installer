@@ -169,7 +169,7 @@ INSTALL_DOCKER() {
         CURRENT_USER=$(whoami)
         echo ${CURRENT_USER}
         sudo usermod -aG docker ${CURRENT_USER}
-
+        source ~/.bashrc
         echo -e "${CYAN}Completed Docker Install"
     else
         echo -e "${CYAN}Docker already installed"
