@@ -80,7 +80,7 @@ PRE_INSTALL_CHECK() {
             jq \
             ufw \
             pwgen \
-            dig
+            dnsutils
     fi
 
     # Setup UFW
