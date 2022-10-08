@@ -337,8 +337,8 @@ FIND_FREE_PORT() {
         fi
         break
     done
-    PORTB=$PORT_TO_TEST
-    #echo "${PORT_TO_TEST}"
+    #PORTB=$PORT_TO_TEST
+    echo "${PORT_TO_TEST}"
 }
 
 CREATE_CONF_FILE() {
@@ -407,7 +407,7 @@ logtimestamps=1
 listen=1
 externalip=${EXTERNALIP}
 bind=${BIND}
-masternodeprivkey="${GN_KEY}"
+masternodeprivkey=${GN_KEY}
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     #rm -f "${HOME}/${CONF}"
