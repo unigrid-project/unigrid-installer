@@ -133,6 +133,7 @@ GET_TXID() {
                 echo -e "${CYAN}Checking the explorer for txid ${URL}"
                 #echo -e "${OUTPUTIDX_RAW}"
                 OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
+                echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
                 if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
                     echo -e "${GREEN}txid has ${COLLATERAL} collateral"
                     echo -e "${GREEN}confirmed txid and output ID"
