@@ -128,19 +128,19 @@ GET_TXID() {
                 TXHASH=''
                 continue
             else
-                URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
-                OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
-                echo -e "${CYAN}Checking the explorer for txid ${URL}"
-                #echo -e "${OUTPUTIDX_RAW}"
-                OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
-                echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
-                if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
-                    echo -e "${GREEN}txid has ${COLLATERAL} collateral"
-                    echo -e "${GREEN}confirmed txid and output ID"
-                    CONFIRMED=1
-                else
-                    MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
-                fi
+                # URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
+                # OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
+                # echo -e "${CYAN}Checking the explorer for txid ${URL}"
+                # #echo -e "${OUTPUTIDX_RAW}"
+                # OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
+                # echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
+                # if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
+                #     echo -e "${GREEN}txid has ${COLLATERAL} collateral"
+                #     echo -e "${GREEN}confirmed txid and output ID"
+                #     CONFIRMED=1
+                # else
+                #     MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                # fi
                 continue
             fi
         fi
