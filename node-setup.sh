@@ -370,6 +370,9 @@ CREATE_CONF_FILE() {
     if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
         sudo ufw allow "${PORTB}"
     fi
+    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
+        sudo ufw allow "${PORTA}"
+    fi
     echo "y" | sudo ufw enable >/dev/null 2>&1
     sudo ufw reload
 
