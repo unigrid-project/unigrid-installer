@@ -302,6 +302,7 @@ IS_PORT_OPEN() {
 }
 
 FIND_FREE_PORT() {
+    echo -e "Looking for an open port."
     PRIVIPADDRESS=${1}
     if [[ -r /proc/sys/net/ipv4/ip_local_port_range ]]; then
         read -r LOWERPORT UPPERPORT </proc/sys/net/ipv4/ip_local_port_range
@@ -313,6 +314,7 @@ FIND_FREE_PORT() {
         LOWERPORT=32769
         UPPERPORT=60998
     fi
+    echo -e "While loop."
     #IS_PORT_OPEN ${PRIVIPADDRESS} ${PORT_TO_TEST}
     LAST_PORT=0
     while :; do
