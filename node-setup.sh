@@ -355,8 +355,10 @@ CREATE_CONF_FILE() {
     echo -e "Public IP Address: ${PUBIPADDRESS}"
     PORTB=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
     echo -e "PORTB: ${PORTB}"
-    PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
-    echo -e "PORTA: ${PORTA}"
+    sleep 1
+    #PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
+    #echo -e "PORTA: ${PORTA}"
+    #sleep 1
     # BASH PROMT
     # while true; do
     #     read -p "Do you wish to use port $PORTB? " yn
