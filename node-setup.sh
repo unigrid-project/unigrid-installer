@@ -17,7 +17,7 @@
 # Run this file
 
 ```
-bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" 'source ~/.bashrc'
+bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" source ~/.bashrc
 ```
 '
 
@@ -221,11 +221,11 @@ INSTALL_NEW_NODE() {
     NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
     echo ${NEW_VOLUME_NAME}
 
-    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    done
+    #while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+    PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    #done
 
-    echo -e "PORTB: ${PORTB}"
+    echo -e "PORT: ${PORTB}"
 
     echo "Copy Volume and run"
     docker run --rm \
