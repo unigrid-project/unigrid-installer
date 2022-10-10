@@ -68,6 +68,7 @@ PRE_INSTALL_CHECK() {
     sudo true >/dev/null 2>&1
     USER_NAME_CURRENT=$(whoami)
     CAN_SUDO=$(timeout --foreground --signal=SIGKILL 1s bash -c "sudo -l 2>/dev/null | grep -v '${USER_NAME_CURRENT}' | wc -l ")
+
     if [[ ${CAN_SUDO} =~ ${RE} ]] && [[ "${CAN_SUDO}" -gt 2 ]]; then
         :
     else
@@ -79,6 +80,7 @@ PRE_INSTALL_CHECK() {
         echo "And then re-run this command."
         return 1 2>/dev/null || exit 1
     fi
+
     if [ ! -x "$(command -v jq)" ] ||
         [ ! -x "$(command -v ufw)" ] ||
         [ ! -x "$(command -v dig)" ] ||
@@ -182,12 +184,31 @@ INSTALL_DOCKER() {
     # check docker info
     if [ ! -x "$(command -v docker)" ]; then
         echo -e "${CYAN}Starting Docker Instll Script"
-        bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
+        USER_NAME_CURRENT=$(whoami)
+        COUNTER=0
+        rm -f ~/install.sh
+        while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "# End of setup script." ~/install.sh) -eq 0 ]]; do
+            rm -f ~/install.sh
+            echo "Downloading Unigrid Setup Script."
+            wget -4qo- https://raw.githubusercontent.com/docker/docker-install/master/install.sh -O ~/install.sh
+            COUNTER=1
+            if [[ "${COUNTER}" -gt 3 ]]; then
+                echo
+                echo "Download of docker script failed."
+                echo
+                exit 1
+            fi
+        done
+        (
+            # shellcheck disable=SC1091
+            # shellcheck source=/home/"${USER_NAME_CURRENT}"/install.sh
+            . ~/install.sh
+        )
+        #bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
         sudo chmod 666 /var/run/docker.sock
         #sudo groupadd docker
-        CURRENT_USER=$(whoami)
-        sudo usermod -aG docker ${CURRENT_USER}
-        /bin/bash
+
+        sudo usermod -aG docker "${CURRENT_USER}"
         echo -e "${CYAN}Completed Docker Install"
     else
         echo -e "${CYAN}Docker already installed"
@@ -484,7 +505,7 @@ INSTALL_COMPLETE() {
 
     # Add gridnode details to a txt file
     FILENAME='gridnodes.txt'
-    OUTPUT="${ORANGE}${CURRENT_CONTAINER_ID} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
     if [ "$OUTPUT" != "" ]; then
         echo $OUTPUT >>~/$FILENAME
     fi
@@ -495,7 +516,8 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Completed Docker Install Script."
     echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
-    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo"
+    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount"
+    echo -e "${CYAN}Some commands may not work immediately as the wallet fully syncs."
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
@@ -515,7 +537,7 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${GREEN}Add the below info to your masternode.conf file."
     echo -e "The info is also stored in a file ~/$FILENAME"
-    echo -e "${ORANGE}"
+    echo -e
     echo -e "${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
     echo
     stty sane 2>/dev/null
