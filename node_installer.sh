@@ -22,6 +22,23 @@ sudo bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigri
 
 '
 
+ORANGE=$(RGBcolor 5 3 0) 
+
+ASCII_ART () {
+echo -e "${ORANGE}"
+clear 2> /dev/null
+cat << "UNIGRID"
+ _   _ _   _ ___ ____ ____  ___ ____
+| | | | \ | |_ _/ ___|  _ \|_ _|  _ \
+| | | |  \| || | |  _| |_) || || | | |
+| |_| | |\  || | |_| |  _ < | || |_| |
+ \___/|_| \_|___\____|_| \_\___|____/
+
+Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB 
+
+UNIGRID
+}
+
 cd ~/ || exit
 COUNTER=0
 rm -f ~/___ugd.sh
@@ -45,3 +62,8 @@ done
 # shellcheck source=/root/___ugd.sh
 . ~/___ugd.sh
 )
+
+# shellcheck source=/root/.bashrc
+. ~/.bashrc
+stty sane 2>/dev/null
+exit

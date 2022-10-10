@@ -54,6 +54,14 @@ PRIVATEADDRESS=127.0.0.1
 RE='^[0-9]+$'
 GN_KEY=''
 
+
+ASCII_ART
+
+if [[ "${ASCII_ART}" ]]
+then
+    ${ASCII_ART}
+fi
+
 PRE_INSTALL_CHECK() {
     # Check for sudo
     # Check for bash
