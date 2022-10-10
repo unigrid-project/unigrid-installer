@@ -496,11 +496,11 @@ INSTALL_COMPLETE() {
     fi
     CREATE_CONF_FILE
     sleep 1.5
-    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
-    sleep 1.5
-    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
-    echo -e "${CYAN}Restarting the Unigrid wallet..."
-    sleep 3
+    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
+    # sleep 1.5
+    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    # echo -e "${CYAN}Restarting the Unigrid wallet..."
+    # sleep 3
 
     ASCII_ART
 
