@@ -22,12 +22,12 @@ sudo bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigri
 
 '
 
-ORANGE=$(RGBcolor 5 3 0) 
+ORANGE='\033[0;33m'
 
-ASCII_ART () {
-echo -e "${ORANGE}"
-clear 2> /dev/null
-cat << "UNIGRID"
+ASCII_ART() {
+    echo -e "${ORANGE}"
+    clear 2>/dev/null
+    cat <<"UNIGRID"
  _   _ _   _ ___ ____ ____  ___ ____
 | | | | \ | |_ _/ ___|  _ \|_ _|  _ \
 | | | |  \| || | |  _| |_) || || | | |
@@ -42,29 +42,30 @@ UNIGRID
 cd ~/ || exit
 COUNTER=0
 rm -f ~/___ugd.sh
-while [[ ! -f ~/___ugd.sh ]] || [[ $( grep -Fxc "# End of setup script." ~/___ugd.sh ) -eq 0 ]]
-do
-  echo "Downloading Unigrid Setup Script."
-  wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___ugd.sh
-  COUNTER=1
-  if [[ "${COUNTER}" -gt 3 ]]
-  then
-    echo
-    echo "Download of setup script failed."
-    echo
-    exit 1
-  fi
+while [[ ! -f ~/___ugd.sh ]] || [[ $(grep -Fxc "# End of setup script." ~/___ugd.sh) -eq 0 ]]; do
+    rm -f ~/___ugd.sh
+    echo "Downloading Unigrid Setup Script."
+    wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___ugd.sh
+    COUNTER=1
+    if [[ "${COUNTER}" -gt 3 ]]; then
+        echo
+        echo "Download of setup script failed."
+        echo
+        exit 1
+    fi
 done
 
 (
-  sleep 2
-  rm ~/___mn.sh
-) & disown
+    sleep 2
+    rm ~/___mn.sh
+) &
+disown
 
 (
-# shellcheck disable=SC1091
-# shellcheck source=/root/___ugd.sh
-. ~/___ugd.sh
+    # shellcheck disable=SC1091
+    # shellcheck source=/root/___ugd.sh
+    . ~/___ugd.sh
+    START_INSTALL
 )
 
 # shellcheck source=/root/.bashrc
