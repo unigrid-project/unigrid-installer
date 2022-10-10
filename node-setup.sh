@@ -393,8 +393,8 @@ CREATE_CONF_FILE() {
     cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
 rpcpassword=${PWA}
-rpcbind=127.0.0.1
-rpcallowip=127.0.0.1
+rpcbind=0.0.0.0
+rpcallowip=0.0.0.0/0
 rpcport=${PORTB}
 addnode=seed1.unigrid.org
 addnode=seed2.unigrid.org
