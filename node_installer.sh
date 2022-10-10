@@ -44,7 +44,6 @@ COUNTER=0
 rm -f ~/___ugd.sh
 while [[ ! -f ~/___ugd.sh ]] || [[ $( grep -Fxc "# End of setup script." ~/___ugd.sh ) -eq 0 ]]
 do
-  rm -f ~/___ugd.sh
   echo "Downloading Unigrid Setup Script."
   wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___ugd.sh
   COUNTER=1
@@ -56,6 +55,11 @@ do
     exit 1
   fi
 done
+
+(
+  sleep 2
+  rm ~/___mn.sh
+) & disown
 
 (
 # shellcheck disable=SC1091
