@@ -445,7 +445,6 @@ maxconnections=250
 server=1
 daemon=1
 logtimestamps=1
-disablewallet=1
 listen=1
 bind=${BIND}
 masternodeprivkey=${GN_KEY}
@@ -565,5 +564,6 @@ START_INSTALL() {
     INSTALL_COMPLETE
 
     rm -f ~/___gn.sh
+    bash
 }
 # End of gridnode setup script.
