@@ -105,6 +105,18 @@ PRE_INSTALL_CHECK() {
             sudo ufw allow "${SSH_PORT_SETTING}" >/dev/null 2>&1
         fi
     fi
+    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
+    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
+        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
+    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
+        sudo ufw allow "${PORTB}"
+    fi
+    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
+        sudo ufw allow "${PORTA}"
+    fi
 
     echo "y" | sudo ufw enable >/dev/null 2>&1
     sudo ufw reload
@@ -185,19 +197,15 @@ INSTALL_DOCKER() {
 CHECK_FOR_NODE_INSTALL() {
 
     CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
-    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    done
-    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
-        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    done
 
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
-        docker run -it -d --name="${BASE_NAME}1" \
+        docker run -it -d \
+            --name="${BASE_NAME}1" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
             --restart unless-stopped \
-            unigrid/unigrid:beta
+            -p "${PORTB}:${PORTB}" \
+            -p "${PORTA}:${PORTA}" unigrid/unigrid:beta
     else
         echo -e "${CYAN}1st node already installed"
         INSTALL_NEW_NODE
@@ -339,12 +347,13 @@ INSTALL_NEW_NODE() {
         -i \
         -d \
         -t \
-        -p ${PORTB}:${PORTB} \
         -v ${DATA_VOLUME}1:/from \
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
     echo "Done copying volume"
     docker run -it -d --name="${NEW_SERVER_NAME}" \
+        -p "${PORTB}:${PORTB}" \
+        -p "${PORTA}:${PORTA}" \
         --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
         --restart unless-stopped \
         unigrid/unigrid:beta
@@ -391,15 +400,6 @@ CREATE_CONF_FILE() {
     #     *) echo "Please answer yes or no." ;;
     #     esac
     # done
-
-    # if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
-    #     sudo ufw allow "${PORTB}"
-    # fi
-    # if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
-    #     sudo ufw allow "${PORTA}"
-    # fi
-    echo "y" | sudo ufw enable >/dev/null 2>&1
-    sudo ufw reload
 
     EXTERNALIP="${PUBIPADDRESS}:${PORTA}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
