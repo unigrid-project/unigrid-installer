@@ -17,7 +17,8 @@
 # Run this file
 
 ```
-bash -c "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" source ~/.bashrc
+bash -ic "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" source ~/.bashrc
+
 ```
 '
 
@@ -178,6 +179,12 @@ INSTALL_DOCKER() {
 CHECK_FOR_NODE_INSTALL() {
 
     CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
+    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
+    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
+        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
 
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
@@ -415,6 +422,7 @@ logtimestamps=1
 listen=1
 bind=${BIND}
 masternodeprivkey=${GN_KEY}
+masternode=1
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     #rm -f "${HOME}/${CONF}"
