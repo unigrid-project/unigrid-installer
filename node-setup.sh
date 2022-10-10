@@ -167,9 +167,8 @@ INSTALL_DOCKER() {
         sudo chmod 666 /var/run/docker.sock
         #sudo groupadd docker
         CURRENT_USER=$(whoami)
-        echo ${CURRENT_USER}
         sudo usermod -aG docker ${CURRENT_USER}
-        source ~/.bashrc
+        /bin/bash
         echo -e "${CYAN}Completed Docker Install"
     else
         echo -e "${CYAN}Docker already installed"
@@ -222,11 +221,18 @@ INSTALL_NEW_NODE() {
     NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
     echo ${NEW_VOLUME_NAME}
 
+    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
+
+    echo -e "PORTB: ${PORTB}"
+
     echo "Copy Volume and run"
     docker run --rm \
         -i \
         -d \
         -t \
+        -p ${PORTB}:${PORTB} \
         -v ${DATA_VOLUME}1:/from \
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
@@ -359,12 +365,6 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
 
-    # while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-    #     PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    # done
-
-    echo -e "PORTB: ${PORTB}"
-
     #PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
     #echo -e "PORTA: ${PORTA}"
     #sleep 1
@@ -485,6 +485,10 @@ INSTALL_COMPLETE() {
     echo -e "${GREEN}docker --help"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
+    echo
+    echo -e "${CYAN}To bash into the container use."
+    echo
+    echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
     echo
     echo -e "${RED} Added ${TX_DETAILS} to grindode conf file."
     echo
