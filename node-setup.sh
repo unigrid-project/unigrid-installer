@@ -456,14 +456,16 @@ COIN_CONF
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
-    docker start "${CURRENT_CONTAINER_ID}"
+    #docker start "${CURRENT_CONTAINER_ID}"
+    CREATE_CONF_FILE
+    sleep 1.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
-    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
-    sleep 1.5
+    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    #sleep 1.5
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
-    sleep 1
+    #sleep 1
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
@@ -494,8 +496,7 @@ INSTALL_COMPLETE() {
 
         rm -f data.json
     fi
-    CREATE_CONF_FILE
-    sleep 1.5
+
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
     # sleep 1.5
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
@@ -525,7 +526,7 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
     echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount"
-    echo -e "${CYAN}Some commands may not work immediately as the wallet fully syncs."
+    echo -e "${CYAN}Some commands may not work immediately until the wallet fully syncs."
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
@@ -537,9 +538,6 @@ INSTALL_COMPLETE() {
     echo -e "${GREEN}docker --help"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
-    echo
-    echo -e "${CYAN}To bash into the container use."
-    echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
     echo
     echo -e "${RED} Added ${CURRENT_CONTAINER_ID} to grindode conf file."
     echo
