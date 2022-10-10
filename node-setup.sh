@@ -192,73 +192,6 @@ CHECK_FOR_NODE_INSTALL() {
 
 }
 
-INSTALL_NEW_NODE() {
-    # Get all of the images names
-    SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
-    sleep 0.1
-    declare -a ARR=($SERVER_NAME)
-
-    for s in "${ARR[@]}"; do
-        if [[ "$s" != 'watchtower' ]]; then
-            ITEM="$(echo ${s} | cut -d'_' -f3)"
-            NUMBERS_ARRAY+=("$ITEM")
-        fi
-    done
-    NUMBERS_ARRAY=($(printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n))
-
-    if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
-        ARRAY_LENGTH='1'
-    else
-        ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
-    fi
-    echo ${ARRAY_LENGTH}
-    LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH} - 1))]}
-    NODE_NUMBER="$(($LAST_DOCKER_NUMBER + 1))"
-
-    ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
-
-    NEW_SERVER_NAME=${BASE_NAME}${NODE_NUMBER}
-    NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
-    echo ${NEW_VOLUME_NAME}
-
-    #while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-    PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    #done
-
-    echo -e "PORT: ${PORTB}"
-
-    echo "Copy Volume and run"
-    docker run --rm \
-        -i \
-        -d \
-        -t \
-        -p ${PORTB}:${PORTB} \
-        -v ${DATA_VOLUME}1:/from \
-        -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
-        alpine ash -c "cd /from ; cp -av . /to"
-    echo "Done copying volume"
-    docker run -it -d --name="${NEW_SERVER_NAME}" \
-        --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
-        --restart unless-stopped \
-        unigrid/unigrid:beta
-}
-
-INSTALL_WATCHTOWER() {
-    # Run watchtower if not found
-    CHECK_WATCHTOWER="$(docker ps -f name=watchtower | grep -w watchtower)"
-    sleep 0.1
-    if [ -z "${CHECK_WATCHTOWER}" ]; then
-        echo -e "${GREEN}Installing watchtower"
-        docker run -d \
-            --name watchtower \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            containrrr/watchtower --debug -c \
-            --trace --include-restarting --interval 30
-    else
-        echo -e "${CYAN}Watchtower already intalled... skipping"
-    fi
-}
-
 IS_PORT_OPEN() {
     PRIVIPADDRESS=${1}
     PORT_TO_TEST=${2}
@@ -350,6 +283,73 @@ FIND_FREE_PORT() {
     done
     #PORTB=$PORT_TO_TEST
     echo "${PORT_TO_TEST}"
+}
+
+INSTALL_NEW_NODE() {
+    # Get all of the images names
+    SERVER_NAME=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
+    sleep 0.1
+    declare -a ARR=($SERVER_NAME)
+
+    for s in "${ARR[@]}"; do
+        if [[ "$s" != 'watchtower' ]]; then
+            ITEM="$(echo ${s} | cut -d'_' -f3)"
+            NUMBERS_ARRAY+=("$ITEM")
+        fi
+    done
+    NUMBERS_ARRAY=($(printf "%s\n" "${NUMBERS_ARRAY[@]}" | sort -n))
+
+    if [ ${#NUMBERS_ARRAY[@]} = "0" ]; then
+        ARRAY_LENGTH='1'
+    else
+        ARRAY_LENGTH="${#NUMBERS_ARRAY[@]}"
+    fi
+    echo ${ARRAY_LENGTH}
+    LAST_DOCKER_NUMBER=${NUMBERS_ARRAY[$((${ARRAY_LENGTH} - 1))]}
+    NODE_NUMBER="$(($LAST_DOCKER_NUMBER + 1))"
+
+    ######### GET HIGHEST NUMBER IN THE ARRAY FOR IMAGES ##########
+
+    NEW_SERVER_NAME=${BASE_NAME}${NODE_NUMBER}
+    NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
+    echo ${NEW_VOLUME_NAME}
+
+    #while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+    PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    #done
+
+    echo -e "PORT: ${PORTB}"
+
+    echo "Copy Volume and run"
+    docker run --rm \
+        -i \
+        -d \
+        -t \
+        -p ${PORTB}:${PORTB} \
+        -v ${DATA_VOLUME}1:/from \
+        -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
+        alpine ash -c "cd /from ; cp -av . /to"
+    echo "Done copying volume"
+    docker run -it -d --name="${NEW_SERVER_NAME}" \
+        --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
+        --restart unless-stopped \
+        unigrid/unigrid:beta
+}
+
+INSTALL_WATCHTOWER() {
+    # Run watchtower if not found
+    CHECK_WATCHTOWER="$(docker ps -f name=watchtower | grep -w watchtower)"
+    sleep 0.1
+    if [ -z "${CHECK_WATCHTOWER}" ]; then
+        echo -e "${GREEN}Installing watchtower"
+        docker run -d \
+            --name watchtower \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            containrrr/watchtower --debug -c \
+            --trace --include-restarting --interval 30
+    else
+        echo -e "${CYAN}Watchtower already intalled... skipping"
+    fi
 }
 
 CREATE_CONF_FILE() {
