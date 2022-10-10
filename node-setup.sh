@@ -187,7 +187,7 @@ INSTALL_DOCKER() {
         USER_NAME_CURRENT=$(whoami)
         COUNTER=0
         rm -f ~/install.sh
-        while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "# End of setup script." ~/install.sh) -eq 0 ]]; do
+        while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "do_install" ~/install.sh) -eq 0 ]]; do
             rm -f ~/install.sh
             echo "Downloading Unigrid Setup Script."
             wget -4qo- https://raw.githubusercontent.com/docker/docker-install/master/install.sh -O ~/install.sh
