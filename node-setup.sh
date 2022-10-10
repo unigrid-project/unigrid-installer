@@ -124,6 +124,41 @@ PRE_INSTALL_CHECK() {
     sudo ufw reload
 }
 
+INSTALL_DOCKER() {
+    # check docker info
+    if [ ! -x "$(command -v docker)" ]; then
+        echo -e "${CYAN}Starting Docker Instll Script"
+        CURRENT_USER=$(whoami)
+        COUNTER=0
+        rm -f ~/install.sh
+        while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "do_install" ~/install.sh) -eq 0 ]]; do
+            rm -f ~/install.sh
+            echo "Downloading Unigrid Setup Script."
+            wget -4qo- https://raw.githubusercontent.com/docker/docker-install/master/install.sh -O ~/install.sh
+            COUNTER=1
+            if [[ "${COUNTER}" -gt 3 ]]; then
+                echo
+                echo "Download of docker script failed."
+                echo
+                exit 1
+            fi
+        done
+        (
+            # shellcheck disable=SC1091
+            # shellcheck source=/home/"${CURRENT_USER}"/install.sh
+            . ~/install.sh
+        )
+        #bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
+        sudo chmod 666 /var/run/docker.sock
+        #sudo groupadd docker
+
+        sudo usermod -aG docker "${CURRENT_USER}"
+        echo -e "${CYAN}Completed Docker Install"
+    else
+        echo -e "${CYAN}Docker already installed"
+    fi
+}
+
 GET_TXID() {
     #get txid and check explorer
     COLLATERAL=3000
@@ -178,41 +213,6 @@ GET_TXID() {
             continue
         fi
     done
-}
-
-INSTALL_DOCKER() {
-    # check docker info
-    if [ ! -x "$(command -v docker)" ]; then
-        echo -e "${CYAN}Starting Docker Instll Script"
-        USER_NAME_CURRENT=$(whoami)
-        COUNTER=0
-        rm -f ~/install.sh
-        while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "do_install" ~/install.sh) -eq 0 ]]; do
-            rm -f ~/install.sh
-            echo "Downloading Unigrid Setup Script."
-            wget -4qo- https://raw.githubusercontent.com/docker/docker-install/master/install.sh -O ~/install.sh
-            COUNTER=1
-            if [[ "${COUNTER}" -gt 3 ]]; then
-                echo
-                echo "Download of docker script failed."
-                echo
-                exit 1
-            fi
-        done
-        (
-            # shellcheck disable=SC1091
-            # shellcheck source=/home/"${USER_NAME_CURRENT}"/install.sh
-            . ~/install.sh
-        )
-        #bash <(wget -qO- https://raw.githubusercontent.com/docker/docker-install/master/install.sh)
-        sudo chmod 666 /var/run/docker.sock
-        #sudo groupadd docker
-
-        sudo usermod -aG docker "${CURRENT_USER}"
-        echo -e "${CYAN}Completed Docker Install"
-    else
-        echo -e "${CYAN}Docker already installed"
-    fi
 }
 
 CHECK_FOR_NODE_INSTALL() {
@@ -492,11 +492,15 @@ INSTALL_COMPLETE() {
             fi
             true >data.json
         done
-        echo -e "${CYAN}Loading the Unigrid backend..."
+
         rm -f data.json
     fi
     CREATE_CONF_FILE
     sleep 1.5
+    docker restart "${CURRENT_CONTAINER_ID}"
+    echo -e "${CYAN}Restarting docker container ${CURRENT_CONTAINER_ID}"
+    sleep 3
+
     ASCII_ART
 
     if [[ "${ASCII_ART}" ]]; then
@@ -511,7 +515,11 @@ INSTALL_COMPLETE() {
     fi
     # Restart the wallet
     echo -e "${CYAN}Restarting the wallet with new conf file."
-    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
+    echo -e "${CYAN}Loading the Unigrid backend..."
+    sleep 30
+    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
+    echo -e "${GREEN}Current block"
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
     echo -e "${CYAN}Completed Docker Install Script."
     echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
@@ -546,9 +554,9 @@ INSTALL_COMPLETE() {
 START_INSTALL() {
     PRE_INSTALL_CHECK
 
-    GET_TXID
-
     INSTALL_DOCKER
+
+    GET_TXID
 
     CHECK_FOR_NODE_INSTALL
 
