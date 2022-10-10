@@ -496,8 +496,10 @@ INSTALL_COMPLETE() {
     fi
     CREATE_CONF_FILE
     sleep 1.5
-    docker restart "${CURRENT_CONTAINER_ID}"
-    echo -e "${CYAN}Restarting docker container ${CURRENT_CONTAINER_ID}"
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
+    sleep 1.5
+    docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
+    echo -e "${CYAN}Restarting the Unigrid wallet..."
     sleep 3
 
     ASCII_ART
@@ -512,10 +514,9 @@ INSTALL_COMPLETE() {
     if [ "$OUTPUT" != "" ]; then
         echo $OUTPUT >>~/$FILENAME
     fi
-    # Restart the wallet
-    echo -e "${CYAN}Restarting the wallet with new conf file."
+
     echo -e "${CYAN}Loading the Unigrid backend..."
-    sleep 30
+    sleep 35
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
