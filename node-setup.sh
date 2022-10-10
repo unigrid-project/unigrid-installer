@@ -476,37 +476,47 @@ INSTALL_COMPLETE() {
     fi
     CREATE_CONF_FILE
     sleep 1.5
+    ASCII_ART
+
+    if [[ "${ASCII_ART}" ]]; then
+        ${ASCII_ART}
+    fi
+
+    # Add gridnode details to a txt file
+    FILENAME='gridnodes.txt'
+    OUTPUT="${ORANGE}${CURRENT_CONTAINER_ID} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    if [ "$OUTPUT" != "" ]; then
+        echo $OUTPUT >>~/$FILENAME
+    fi
     # Restart the wallet
     echo -e "${CYAN}Restarting the wallet with new conf file."
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
-
-    echo -e "${GREEN}Unigrid daemon fully synced!"
     echo
     echo -e "${CYAN}Completed Docker Install Script."
     echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
-    echo
     echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo"
     echo
     echo -e "${CYAN}To access the container you can type..."
-    echo
     echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
     echo
     echo -e "${CYAN}To see a full list of all containers use..."
-    echo
     echo -e "${GREEN}docker ps"
     echo
     echo -e "${CYAN}For help"
-    echo
     echo -e "${GREEN}docker --help"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
     echo -e "${CYAN}To bash into the container use."
-    echo
     echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
     echo
-    echo -e "${RED} Added ${TX_DETAILS} to grindode conf file."
+    echo -e "${RED} Added ${CURRENT_CONTAINER_ID} to grindode conf file."
+    echo
+    echo -e "${GREEN}Add the below info to your masternode.conf file."
+    echo -e "The info is also stored in a file ~/$FILENAME"
+    echo -e
+    echo -e "${ORANGE}${CURRENT_CONTAINER_ID} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
     echo
     stty sane 2>/dev/null
 }
