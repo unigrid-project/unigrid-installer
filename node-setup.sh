@@ -197,11 +197,11 @@ INSTALL_DOCKER() {
 CHECK_FOR_NODE_INSTALL() {
 
     CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
-
+    NEW_SERVER_NAME="${BASE_NAME}1"
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
         docker run -it -d \
-            --name="${BASE_NAME}1" \
+            --name="${NEW_SERVER_NAME}" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
             --restart unless-stopped \
             -p "${PORTB}:${PORTB}" \
@@ -515,8 +515,8 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${GREEN}Add the below info to your masternode.conf file."
     echo -e "The info is also stored in a file ~/$FILENAME"
-    echo -e
-    echo -e "${ORANGE}${CURRENT_CONTAINER_ID} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    echo -e "${ORANGE}"
+    echo -e "${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
     echo
     stty sane 2>/dev/null
 }
@@ -533,5 +533,7 @@ START_INSTALL() {
     INSTALL_WATCHTOWER
 
     INSTALL_COMPLETE
+
+    rm -f ~/___gn.sh
 }
 # End of gridnode setup script.
