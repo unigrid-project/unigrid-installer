@@ -524,3 +524,5 @@ START_INSTALL() {
 
     INSTALL_COMPLETE
 }
+
+# End of setup script.
