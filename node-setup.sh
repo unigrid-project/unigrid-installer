@@ -48,7 +48,7 @@ CONF='unigrid.conf'
 PORTA='0'
 PORTB='0'
 CURRENT_CONTAINER_ID=''
-PRIVATEADDRESS="127.0.0.1"
+PRIVATEADDRESS=127.0.0.1
 # Regex to check if output is a number.
 RE='^[0-9]+$'
 GN_KEY=''
@@ -312,9 +312,12 @@ INSTALL_NEW_NODE() {
     NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
     echo ${NEW_VOLUME_NAME}
 
-    #while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-    PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
-    #done
+    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
+        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
+    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
+        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    done
 
     echo -e "PORT: ${PORTB}"
 
@@ -385,7 +388,7 @@ CREATE_CONF_FILE() {
     echo "y" | sudo ufw enable >/dev/null 2>&1
     sudo ufw reload
 
-    EXTERNALIP="${PUBIPADDRESS}:${PORTB}"
+    EXTERNALIP="${PUBIPADDRESS}:${PORTA}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
     # :${PORTB}"
@@ -396,6 +399,8 @@ rpcpassword=${PWA}
 rpcbind=0.0.0.0
 rpcallowip=0.0.0.0/0
 rpcport=${PORTB}
+port=${PORTA}
+externalip=${EXTERNALIP}
 addnode=seed1.unigrid.org
 addnode=seed2.unigrid.org
 addnode=seed3.unigrid.org
@@ -408,7 +413,6 @@ server=1
 daemon=1
 logtimestamps=1
 listen=1
-externalip=${EXTERNALIP}
 bind=${BIND}
 masternodeprivkey=${GN_KEY}
 COIN_CONF
