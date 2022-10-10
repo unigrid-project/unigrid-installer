@@ -524,5 +524,4 @@ START_INSTALL() {
 
     INSTALL_COMPLETE
 }
-
-# End of setup script.
+# End of gridnode setup script.

@@ -41,11 +41,11 @@ UNIGRID
 
 cd ~/ || exit
 COUNTER=0
-rm -f ~/___ugd.sh
-while [[ ! -f ~/___ugd.sh ]] || [[ $(grep -Fxc "# End of setup script." ~/___ugd.sh) -eq 0 ]]; do
-    rm -f ~/___ugd.sh
+rm -f ~/___gn.sh
+while [[ ! -f ~/___gn.sh ]] || [[ $(grep -Fxc "# End of gridnode setup script." ~/___gn.sh) -eq 0 ]]; do
+    rm -f ~/___gn.sh
     echo "Downloading Unigrid Setup Script."
-    wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___ugd.sh
+    wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___gn.sh
     COUNTER=1
     if [[ "${COUNTER}" -gt 3 ]]; then
         echo
@@ -57,14 +57,14 @@ done
 
 (
     sleep 2
-    rm ~/___mn.sh
+    rm ~/___gn.sh
 ) &
 disown
 
 (
     # shellcheck disable=SC1091
-    # shellcheck source=/root/___ugd.sh
-    . ~/___ugd.sh
+    # shellcheck source=/root/___gn.sh
+    . ~/___gn.sh
     START_INSTALL
 )
 
