@@ -562,7 +562,8 @@ START_INSTALL() {
 
     INSTALL_COMPLETE
 
-    rm -f ~/___gn.sh
+    rm -f ~/___gn.sh install.sh
+
     bash
 }
 # End of gridnode setup script.
