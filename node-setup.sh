@@ -506,11 +506,21 @@ INSTALL_COMPLETE() {
     if [ "$OUTPUT" != "" ]; then
         echo $OUTPUT >>~/$FILENAME
     fi
-    docker restart "${CURRENT_CONTAINER_ID}"
     echo -e "${CYAN}Restarting the docker container with the updated configuration."
-    sleep 2
-    echo -e "${CYAN}Loading the Unigrid backend..."
-    sleep 30
+    docker restart "${CURRENT_CONTAINER_ID}"
+
+    COUNTER=0
+    while [[ "$COUNTER" -le "30" ]]; do
+        echo -e "${ORANGE}"
+        echo -en "\\r${GREEN}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
+        sleep 1
+        COUNTER=$((COUNTER+1))
+        if [[ "$COUNTER" -ge "30" ]]; then
+            echo
+            break
+        fi
+    done
+    #sleep 30
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
@@ -538,7 +548,7 @@ INSTALL_COMPLETE() {
     echo
     stty sane 2>/dev/null
 }
-
+0.
 START_INSTALL() {
     PRE_INSTALL_CHECK
 
