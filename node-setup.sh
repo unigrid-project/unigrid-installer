@@ -188,19 +188,19 @@ GET_TXID() {
                 OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
                 echo -e "${CYAN}Checking the explorer for txid ${URL}"
                 #echo -e "${OUTPUTIDX_RAW}"
-                OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
-                echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
-                if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
-                    echo -e "${GREEN}txid has ${COLLATERAL} collateral"
-                    echo -e "${GREEN}confirmed txid and output ID"
-                    CONFIRMED=1
-                else
-                    #MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
-                    echo -e "${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
-                    echo -e "${GREEN}Continuing with the install, you can change the txid later."
-                    sleep 1.5
-                    CONFIRMED=1
-                fi
+                # OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
+                # echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
+                # if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
+                #     echo -e "${GREEN}txid has ${COLLATERAL} collateral"
+                #     echo -e "${GREEN}confirmed txid and output ID"
+                #     CONFIRMED=1
+                # else
+                #     #MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                #     echo -e "${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                #     echo -e "${GREEN}Continuing with the install, you can change the txid later."
+                #     sleep 1.5
+                #     CONFIRMED=1
+                # fi
                 # TODO ADD COLLATERAL CHECK HERE
                 CONFIRMED=1
                 continue
@@ -511,8 +511,7 @@ INSTALL_COMPLETE() {
 
     COUNTER=0
     while [[ "$COUNTER" -le "30" ]]; do
-        echo -e "${ORANGE}"
-        echo -en "\\r${GREEN}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
+        echo -en "\\r${ORANGE}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
         sleep 1
         COUNTER=$((COUNTER+1))
         if [[ "$COUNTER" -ge "30" ]]; then
