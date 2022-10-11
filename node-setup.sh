@@ -63,7 +63,7 @@ fi
 PRE_INSTALL_CHECK() {
     # Check for sudo
     # Check for bash
-    echo "Pre-install check"
+    echo -e "${CYAN}Pre-install check"
     # Only run if user has sudo.
     sudo true >/dev/null 2>&1
     USER_NAME_CURRENT=$(whoami)
@@ -184,19 +184,23 @@ GET_TXID() {
                 TXHASH=''
                 continue
             else
-                # URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
-                # OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
-                # echo -e "${CYAN}Checking the explorer for txid ${URL}"
-                # #echo -e "${OUTPUTIDX_RAW}"
-                # OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
-                # echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
-                # if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
-                #     echo -e "${GREEN}txid has ${COLLATERAL} collateral"
-                #     echo -e "${GREEN}confirmed txid and output ID"
-                #     CONFIRMED=1
-                # else
-                #     MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
-                # fi
+                URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
+                OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
+                echo -e "${CYAN}Checking the explorer for txid ${URL}"
+                #echo -e "${OUTPUTIDX_RAW}"
+                OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
+                echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
+                if [[ "${OUTPUTIDX_WEB}" = 0 ]]; then
+                    echo -e "${GREEN}txid has ${COLLATERAL} collateral"
+                    echo -e "${GREEN}confirmed txid and output ID"
+                    CONFIRMED=1
+                else
+                    #MSG="${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                    echo -e "${RED}warning!!! txid does not have exactly ${COLLATERAL} collateral"
+                    echo -e "${GREEN}Continuing with the install, you can change the txid later."
+                    sleep 1.5
+                    CONFIRMED=1
+                fi
                 # TODO ADD COLLATERAL CHECK HERE
                 CONFIRMED=1
                 continue
@@ -409,19 +413,6 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
 
-    #PORTA=$( FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1 )
-    #echo -e "PORTA: ${PORTA}"
-    #sleep 1
-    # BASH PROMT
-    # while true; do
-    #     read -p "Do you wish to use port $PORTB? " yn
-    #     case $yn in
-    #     [Yy]*) exit ;;
-    #     [Nn]*) FIND_FREE_PORT ${PRIVATEADDRESS} ;;
-    #     *) echo "Please answer yes or no." ;;
-    #     esac
-    # done
-
     EXTERNALIP="${PUBIPADDRESS}:${PORTA}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
@@ -451,14 +442,14 @@ masternodeprivkey=${GN_KEY}
 masternode=1
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
-    #rm -f "${HOME}/${CONF}"
+    rm -f "${HOME}/${CONF}"
 }
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
     #docker start "${CURRENT_CONTAINER_ID}"
     CREATE_CONF_FILE
-    sleep 1.5
+    sleep 1
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
@@ -515,10 +506,11 @@ INSTALL_COMPLETE() {
     if [ "$OUTPUT" != "" ]; then
         echo $OUTPUT >>~/$FILENAME
     fi
-
+    docker restart "${CURRENT_CONTAINER_ID}"
+    echo -e "${CYAN}Restarting the docker container with the updated configuration."
+    sleep 2
     echo -e "${CYAN}Loading the Unigrid backend..."
-    sleep 35
-    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart
+    sleep 30
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
@@ -538,8 +530,6 @@ INSTALL_COMPLETE() {
     echo -e "${GREEN}docker --help"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
-    echo
-    echo -e "${RED} Added ${CURRENT_CONTAINER_ID} to grindode conf file."
     echo
     echo -e "${GREEN}Add the below info to your masternode.conf file."
     echo -e "The info is also stored in a file ~/$FILENAME"
