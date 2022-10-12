@@ -460,9 +460,16 @@ INSTALL_COMPLETE() {
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
-        echo - e "Clean volume install for ${NEW_SERVER_NAME}"
+        echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+        if [[ "${BLOCK_COUNT:0:5}" = 'error' ]]; then
+            while [ "${BLOCK_COUNT:0:5}" = 'error' ]; do
+                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+                sleep 0.5
+            done
+        fi
+
         sleep 0.5
         touch data.json
         PROGRESS=''
@@ -514,7 +521,7 @@ INSTALL_COMPLETE() {
     while [[ "$COUNTER" -le "30" ]]; do
         echo -en "\\r${ORANGE}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
         sleep 1
-        COUNTER=$((COUNTER+1))
+        COUNTER=$((COUNTER + 1))
         if [[ "$COUNTER" -ge "30" ]]; then
             echo
             break
