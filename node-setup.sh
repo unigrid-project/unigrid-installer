@@ -454,6 +454,7 @@ INSTALL_COMPLETE() {
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
     echo -e "New container name: ${NEW_SERVER_NAME}"
+    sleep 5
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
     #sleep 1.5
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
@@ -461,6 +462,7 @@ INSTALL_COMPLETE() {
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
+        echo - e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
         sleep 0.5
@@ -488,7 +490,7 @@ INSTALL_COMPLETE() {
 
         rm -f data.json
     fi
-
+    sleep 5
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
     # sleep 1.5
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
