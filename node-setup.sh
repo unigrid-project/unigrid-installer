@@ -447,14 +447,13 @@ COIN_CONF
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
-    docker start "${CURRENT_CONTAINER_ID}"
+    docker restart "${CURRENT_CONTAINER_ID}"
     CREATE_CONF_FILE
-    sleep 1
+    sleep 0.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
     echo -e "New container name: ${NEW_SERVER_NAME}"
-    sleep 1
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
     #sleep 1
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
