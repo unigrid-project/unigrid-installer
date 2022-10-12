@@ -474,11 +474,11 @@ INSTALL_COMPLETE() {
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-        echo -e "Block count: ${BLOCK_COUNT}"
-        if [[ "${BLOCK_COUNT:0:5}" = 'error' ]]; then
-            while [ "${BLOCK_COUNT:0:5}" = 'error' ]; do
+        echo -e "Checking if the container has started."
+        if [[ "${BLOCK_COUNT}" = '' ]]; then
+            while [ "${BLOCK_COUNT}" = '' ]; do
                 BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-                sleep 0.5
+                sleep 1
             done
         fi
 
