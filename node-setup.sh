@@ -447,16 +447,14 @@ COIN_CONF
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
-    #docker start "${CURRENT_CONTAINER_ID}"
+    docker start "${CURRENT_CONTAINER_ID}"
     CREATE_CONF_FILE
     sleep 1
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
     echo -e "New container name: ${NEW_SERVER_NAME}"
-    sleep 5
-    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
-    #sleep 1.5
+    sleep 1
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
     #sleep 1
     # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
@@ -566,6 +564,5 @@ START_INSTALL() {
 
     rm -f ~/___gn.sh install.sh
 
-    bash
 }
 # End of gridnode setup script.
