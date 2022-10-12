@@ -453,6 +453,7 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
+    echo -e "New container name: ${NEW_SERVER_NAME}"
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
     #sleep 1.5
     #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
@@ -524,13 +525,13 @@ INSTALL_COMPLETE() {
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
     echo -e "${CYAN}Completed Docker Install Script."
-    echo -e "${CYAN}Docker container ${CURRENT_CONTAINER_ID} has started!"
+    echo -e "${CYAN}Docker container ${NEW_SERVER_NAME} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
-    echo -e "${GREEN}docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount"
+    echo -e "${GREEN}docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid getblockcount"
     echo -e "${CYAN}Some commands may not work immediately until the wallet fully syncs."
     echo
     echo -e "${CYAN}To access the container you can type..."
-    echo -e "${GREEN}docker exec -it ${CURRENT_CONTAINER_ID} /bin/bash"
+    echo -e "${GREEN}docker exec -it ${NEW_SERVER_NAME} /bin/bash"
     echo
     echo -e "${CYAN}To see a full list of all containers use..."
     echo -e "${GREEN}docker ps"
