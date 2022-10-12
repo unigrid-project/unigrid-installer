@@ -548,7 +548,7 @@ INSTALL_COMPLETE() {
     echo
     stty sane 2>/dev/null
 }
-0.
+
 START_INSTALL() {
     PRE_INSTALL_CHECK
 
