@@ -17,7 +17,7 @@
 # Run this file
 
 ```
-sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/removecontainers.sh)" 'source ~/.bashrc'
+sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/dockercleaner.sh)" 'source ~/.bashrc'
 ```
 
 '
