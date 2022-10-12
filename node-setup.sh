@@ -447,21 +447,34 @@ COIN_CONF
 
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
-    docker restart "${CURRENT_CONTAINER_ID}"
     CREATE_CONF_FILE
     sleep 0.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
     echo -e "New container name: ${NEW_SERVER_NAME}"
-    #docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getinfo
-    #sleep 1
-    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
+
+    ASCII_ART
+
+    if [[ "${ASCII_ART}" ]]; then
+        ${ASCII_ART}
+    fi
+
+    # Add gridnode details to a txt file
+    FILENAME='gridnodes.txt'
+    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    if [ "$OUTPUT" != "" ]; then
+        echo $OUTPUT >>~/$FILENAME
+    fi
+    echo -e "${CYAN}Restarting the docker container with the updated configuration."
+    docker restart "${CURRENT_CONTAINER_ID}"
+
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+        echo -e "Block count: ${BLOCK_COUNT}"
         if [[ "${BLOCK_COUNT:0:5}" = 'error' ]]; then
             while [ "${BLOCK_COUNT:0:5}" = 'error' ]; do
                 BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
@@ -494,27 +507,6 @@ INSTALL_COMPLETE() {
 
         rm -f data.json
     fi
-    sleep 5
-    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service stop
-    # sleep 1.5
-    # docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service start
-    # echo -e "${CYAN}Restarting the Unigrid wallet..."
-    # sleep 3
-
-    ASCII_ART
-
-    if [[ "${ASCII_ART}" ]]; then
-        ${ASCII_ART}
-    fi
-
-    # Add gridnode details to a txt file
-    FILENAME='gridnodes.txt'
-    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
-    if [ "$OUTPUT" != "" ]; then
-        echo $OUTPUT >>~/$FILENAME
-    fi
-    echo -e "${CYAN}Restarting the docker container with the updated configuration."
-    docker restart "${CURRENT_CONTAINER_ID}"
 
     COUNTER=0
     while [[ "$COUNTER" -le "30" ]]; do
@@ -526,7 +518,7 @@ INSTALL_COMPLETE() {
             break
         fi
     done
-    #sleep 30
+
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
