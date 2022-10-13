@@ -22,6 +22,10 @@ bash -ic "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/uni
 ```
 '
 
+if [[ "${IMAGE_SOURCE}" ]]
+then
+    echo "IMAGE_SOURCE: ${IMAGE_SOURCE}"
+fi
 EXPLORER_URL='http://explorer.unigrid.org/'
 EXPLORER_RAWTRANSACTION_PATH='api/getrawtransaction?txid='
 PATH_SUFFIX='&decrypt=1'
@@ -230,7 +234,7 @@ CHECK_FOR_NODE_INSTALL() {
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
             --restart unless-stopped \
             -p "${PORTB}:${PORTB}" \
-            -p "${PORTA}:${PORTA}" unigrid/unigrid:beta
+            -p "${PORTA}:${PORTA}" unigrid/unigrid:"${IMAGE_SOURCE}"
     else
         echo -e "${CYAN}1st node already installed"
         INSTALL_NEW_NODE
@@ -381,7 +385,7 @@ INSTALL_NEW_NODE() {
         -p "${PORTA}:${PORTA}" \
         --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
         --restart unless-stopped \
-        unigrid/unigrid:beta
+        unigrid/unigrid:"${IMAGE_SOURCE}"
 }
 
 INSTALL_WATCHTOWER() {
@@ -390,10 +394,11 @@ INSTALL_WATCHTOWER() {
     sleep 0.1
     if [ -z "${CHECK_WATCHTOWER}" ]; then
         echo -e "${GREEN}Installing watchtower"
+        # TODO add random intervals for watchtower check
         docker run -d \
             --name watchtower \
             -v /var/run/docker.sock:/var/run/docker.sock \
-            containrrr/watchtower --debug -c \
+            containrrr/watchtower -c \
             --trace --include-restarting --interval 30
     else
         echo -e "${CYAN}Watchtower already intalled... skipping"

@@ -22,6 +22,14 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-ins
 
 '
 
+if [[ -n "${1}" ]]
+then
+IMAGE_SOURCE="${1}"
+else
+# TODO set this to latest
+IMAGE_SOURCE='beta'
+fi
+
 ORANGE='\033[0;33m'
 
 ASCII_ART() {

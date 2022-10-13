@@ -31,7 +31,7 @@ GROUNDHOG_REPO='unigrid-project/groundhog'
 AUTH_TOKEN=''
 USER_NAME=''
 # Set username
-if [[ ! -z "$1" ]]
+if [[ -n "$1" ]]
 then
 USER_NAME="${1}"
 else
