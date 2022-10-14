@@ -26,8 +26,7 @@ if [[ -n "${1}" ]]
 then
 IMAGE_SOURCE="${1}"
 else
-# TODO set this to latest
-IMAGE_SOURCE='beta'
+IMAGE_SOURCE='latest'
 fi
 
 ORANGE='\033[0;33m'
