@@ -464,7 +464,14 @@ INSTALL_COMPLETE() {
     if [[ "${ASCII_ART}" ]]; then
         ${ASCII_ART}
     fi
-
+    # Add commands to .bash_aliases
+    BASH_ALIASES='.bash_aliases'
+    SINGLE_QUOTE="'"
+    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
+    if [ "$COMMAND" != "" ]; then
+        echo $COMMAND >>~/$BASH_ALIASES
+         . ~/.bashrc
+    fi
     # Add gridnode details to a txt file
     FILENAME='gridnodes.txt'
     OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
@@ -530,12 +537,16 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Completed Docker Install Script."
     echo -e "${CYAN}Docker container ${NEW_SERVER_NAME} has started!"
     echo -e "${CYAN}To call the unigrid daemon use..."
-    echo -e "${GREEN}docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid getblockcount"
+    echo -e "${GREEN}${NEW_SERVER_NAME} getblockcount"
+    echo -e "${ORANGE}Once you have started your gridnode from your local wallet"
+    echo -e "${GREEN}${NEW_SERVER_NAME} masternodedebug"
     echo -e "${CYAN}Some commands may not work immediately until the wallet fully syncs."
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo -e "${GREEN}docker exec -it ${NEW_SERVER_NAME} /bin/bash"
     echo
+    echo -e "${CYAN}To restart your docker container."
+    echo -e "${GREEN}docker restart ${NEW_SERVER_NAME}"
     echo -e "${CYAN}To see a full list of all containers use..."
     echo -e "${GREEN}docker ps"
     echo
@@ -566,6 +577,8 @@ START_INSTALL() {
     INSTALL_COMPLETE
 
     rm -f ~/___gn.sh install.sh
+
+    . ~/.bashrc
 
 }
 # End of gridnode setup script.
