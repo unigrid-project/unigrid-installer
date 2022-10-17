@@ -99,7 +99,7 @@ help)
     # show list of commands
     SHOW_ASCII
     echo
-    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|get-blocks <COMMAND>}"
+    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks <COMMAND>}"
     echo
     exit 1
     ;;
@@ -125,6 +125,12 @@ stop-all)
     SHOW_ASCII
     echo
     STOP_ALL
+    echo
+    ;;
+start-all)
+    SHOW_ASCII
+    echo
+    START_ALL
     echo
     ;;
 debug)
