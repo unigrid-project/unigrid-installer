@@ -13,17 +13,7 @@
 # You should have received an addended copy of the GNU Affero General Public License with this program.
 # If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/unigrid-installer>.
 
-: '
-# Run this file
-
-```
-bash -ic "$(wget -4qO- -o- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh)" source ~/.bashrc
-
-```
-'
-
-if [[ "${IMAGE_SOURCE}" ]]
-then
+if [[ "${IMAGE_SOURCE}" ]]; then
     echo "IMAGE_SOURCE: ${IMAGE_SOURCE}"
 fi
 EXPLORER_URL='http://explorer.unigrid.org/'
@@ -137,7 +127,7 @@ INSTALL_DOCKER() {
         rm -f ~/install.sh
         while [[ ! -f ~/install.sh ]] || [[ $(grep -Fxc "do_install" ~/install.sh) -eq 0 ]]; do
             rm -f ~/install.sh
-            echo "Downloading Unigrid Setup Script."
+            echo "Downloading Docker Setup Script."
             wget -4qo- https://raw.githubusercontent.com/docker/docker-install/master/install.sh -O ~/install.sh
             COUNTER=1
             if [[ "${COUNTER}" -gt 3 ]]; then
@@ -450,6 +440,25 @@ COIN_CONF
     rm -f "${HOME}/${CONF}"
 }
 
+INSTALL_HELPER() {
+    COUNTER=0
+    rm -f ~/gridnode
+    while [[ ! -f ~/gridnode ]] || [[ $(grep -Fxc "# End of script." ~/gridnode) -eq 0 ]]; do
+        rm -f ~/gridnode
+        echo "Downloading Helper Script."
+        wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/gridnode -O ~/gridnode
+        COUNTER=1
+        if [[ "${COUNTER}" -gt 3 ]]; then
+            echo
+            echo "Download of docker script failed."
+            echo
+            exit 1
+        fi
+    done
+    sudo mv ~/gridnode /usr/bin/
+    sudo chmod +x /usr/bin/gridnode
+}
+
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
     CREATE_CONF_FILE
@@ -470,8 +479,10 @@ INSTALL_COMPLETE() {
     COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
     if [ "$COMMAND" != "" ]; then
         echo $COMMAND >>~/$BASH_ALIASES
-         . ~/.bashrc
+        . ~/.bashrc
     fi
+    # Add helper commands to /usr/bin
+    INSTALL_HELPER
     # Add gridnode details to a txt file
     FILENAME='gridnodes.txt'
     OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
@@ -552,6 +563,9 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}For help"
     echo -e "${GREEN}docker --help"
+    echo 
+    echo -e "${BLUE}There are also a set of helper commands for all containers."
+    echo -e "For a list of commands type 'gridnode help'"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo

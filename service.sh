@@ -19,18 +19,11 @@ CLI='/usr/local/bin/unigrid-cli'
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
-TEST_RESPONSE='{
-  "status": "complete",
-  "walletstatus": "Done loading",
-  "progress": 0
-}'
-
 CHECK_IF_RUNNING() {
       GROUNDHOG="$(! pgrep -f groundhog &> /dev/null ; echo $?)"
       echo "groundhog: ${GROUNDHOG}"
       if [ "${GROUNDHOG}" = "0" ]; then
       start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE --chuid $USER --exec $DAEMON $DAEMON_OPTS
-      echo -e "${TEST_RESPONSE}"
       else
       echo -e "Groundhog is running"
       fi
@@ -65,7 +58,7 @@ case "$1" in
         ;;
 
   *)
-        echo "Usage: "$1" {start|stop|restart|unigrid <COMMAND>}"
+        echo "Usage: "$1" {start|stop|restart|unigrid|check <COMMAND>}"
         exit 1
 esac
 

@@ -1,0 +1,131 @@
+#!/bin/bash
+# shellcheck disable=SC2034
+# Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+
+# This program is free software: you can redistribute it and/or modify it under the terms of the
+# addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+# of the License (see COPYING and COPYING.addendum).
+
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+
+# You should have received an addended copy of the GNU Affero General Public License with this program.
+# If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/unigrid-installer>.
+
+CYAN='\033[0;36m'
+BLUE="\033[1;34m"
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+ORANGE='\033[0;33m'
+NAME='gridnode'
+
+ASCII_ART() {
+    echo -e "${ORANGE}"
+    clear 2>/dev/null
+    cat <<"UNIGRID"
+ _   _ _   _ ___ ____ ____  ___ ____
+| | | | \ | |_ _/ ___|  _ \|_ _|  _ \
+| | | |  \| || | |  _| |_) || || | | |
+| |_| | |\  || | |_| |  _ < | || |_| |
+ \___/|_| \_|___\____|_| \_\___|____/
+
+Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB 
+
+UNIGRID
+}
+
+GET_STATUS() {
+    echo -e "${BLUE}Gridnode container status"
+    docker ps -a --format "table {{.Names}}\t{{.RunningFor}}\t{{.Status}}"
+}
+
+DEBUG() {
+    echo -e "${BLUE}Gridnode debug"
+    CONTAINERS=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
+    sleep 0.1
+    declare -a ARR=($CONTAINERS)
+    for s in "${ARR[@]}"; do
+        if [[ "$s" != 'watchtower' ]]; then
+            echo -e "${BLUE}${s}"
+            docker exec -i "${s}" ugd_service unigrid masternodedebug
+        fi
+    done
+}
+
+GET_BLOCKS() {
+    echo -e "${BLUE}Getting curent block count of all containers"
+    CONTAINERS=$(docker ps -a --no-trunc --format '{{.Names}}' | tr '\n' ' ')
+    sleep 0.1
+    declare -a ARR=($CONTAINERS)
+    for s in "${ARR[@]}"; do
+        if [[ "$s" != 'watchtower' ]]; then
+            echo -e "${BLUE}${s}"
+            docker exec -i "${s}" ugd_service unigrid getblockcount
+        fi
+    done
+}
+
+GET_LIST() {
+    echo -e "${BLUE}Gridnode container list"
+    docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.ID}}"
+}
+
+RESTART_ALL() {
+    echo -e "Restarting all gridnode containers"
+    docker restart $(docker ps -q)
+}
+
+STOP_ALL() {
+    echo -e "stop all"
+}
+
+case "$1" in
+help)
+    # show list of commands
+    ASCII_ART
+    if [[ "${ASCII_ART}" ]]; then
+        ${ASCII_ART}
+    fi
+    echo
+    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|get-blocks <COMMAND>}"
+    echo
+    exit 1
+    ;;
+status)
+    echo
+    GET_STATUS
+    echo
+    ;;
+list)
+    echo
+    GET_LIST
+    echo
+    ;;
+restart-all)
+    echo
+    RESTART_ALL
+    echo
+    ;;
+stop-all)
+    echo
+    STOP_ALL
+    echo
+    ;;
+debug)
+    echo
+    DEBUG
+    echo
+    ;;
+get-blocks)
+    echo
+    GET_BLOCKS
+    echo
+    ;;
+*)
+    echo -e "${RED}Missing command, use '${NAME} help' for more info."
+    exit 1
+    ;;
+esac
+
+# End of script.
