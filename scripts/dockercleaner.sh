@@ -82,7 +82,7 @@ FIND_DOCKER_IMAGES() {
             FILTERED_ARRAY+=("${s}")
         fi
     done
-    echo -e "Remove containers ${FILTERED_ARRAY[@]}"
+    echo -e "Remove containers" "${FILTERED_ARRAY[@]}"
     docker rm "${FILTERED_ARRAY[@]}" --force
 }
 
