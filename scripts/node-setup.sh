@@ -214,11 +214,10 @@ GET_TXID() {
 }
 
 CHECK_FOR_NODE_INSTALL() {
-
     CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
-    NEW_SERVER_NAME="${BASE_NAME}1"
     if [ -z "${CHECK_NODE}" ]; then
         echo -e "${GREEN}Clean install docker image"
+        NEW_SERVER_NAME="${BASE_NAME}1"
         docker run -it -d \
             --name="${NEW_SERVER_NAME}" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
