@@ -446,7 +446,7 @@ INSTALL_HELPER() {
     while [[ ! -f ~/gridnode ]] || [[ $(grep -Fxc "# End of script." ~/gridnode) -eq 0 ]]; do
         rm -f ~/gridnode
         echo "Downloading Gridnode Helper Script."
-        wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/gridnode -O ~/gridnode
+        wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/gridnode -O ~/gridnode
         COUNTER=1
         if [[ "${COUNTER}" -gt 3 ]]; then
             echo

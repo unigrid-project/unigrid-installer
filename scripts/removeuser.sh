@@ -17,7 +17,7 @@
 # Run this file
 
 ```
-sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/removeuser.sh)" 'source ~/.bashrc' <USERNAME>
+sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/removeuser.sh)" 'source ~/.bashrc' <USERNAME>
 ```
 
 '

@@ -52,7 +52,7 @@ rm -f ~/___gn.sh
 while [[ ! -f ~/___gn.sh ]] || [[ $(grep -Fxc "# End of gridnode setup script." ~/___gn.sh) -eq 0 ]]; do
     rm -f ~/___gn.sh
     echo "Downloading Unigrid Setup Script."
-    wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node-setup.sh -O ~/___gn.sh
+    wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/node-setup.sh -O ~/___gn.sh
     COUNTER=1
     if [[ "${COUNTER}" -gt 3 ]]; then
         echo

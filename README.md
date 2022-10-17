@@ -1,36 +1,16 @@
-# unigrid-installer
+# Unigrid Gridnode Installer Script
 
-# using the script
-To use the script copy and paste this into your server terminal window.
-
-```
-sudo bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/unigrid.sh)" ; source ~/.bashrc
-```
-
-# alternate username
-To use a custom usernam, use the code like this. Replacing `<USERNAME>` with whatever name you wish to use.
-```
-sudo bash -c "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/unigrid.sh)" 'source ~/.bashrc' <USERNAME>
-```
-
-# Removing the service
+# Using The Script
+To use the script copy and paste this into your server terminal window. You will need sudo installed and root privileges.
 
 ```
-systemctl stop unigrid.service 
-systemctl disable unigrid.service  
-rm /etc/systemd/system/unigrid.service  
-systemctl daemon-reload 
-systemctl reset-failed
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
 ```
 
-# Remove the user
-`TODO turn this into a script that accepts the username as an arg`
+# Commands
 
-```
-sudo userdel -r unigrid
-```
+After install you can call the running container with different commands. On the first install the container name will be `ugd_docker_1`. To call check the current block you can use `ugd_docker_1 getblockcount`.
 
-# To access 
-runuser -l  nafo -c 'nafo getinfo'
+Another set of convenience commands are under `gridnode help`.
 
 
