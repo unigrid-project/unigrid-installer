@@ -97,7 +97,7 @@ FIND_VOLUMES() {
             FILTERED_ARRAY+=("${s}")
         fi
     done
-    echo -e "Remove containers ${FILTERED_ARRAY[@]}"
+    echo -e "Remove containers" "${FILTERED_ARRAY[@]}"
     docker volume rm "${FILTERED_ARRAY[@]}"
 }
 
