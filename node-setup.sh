@@ -445,12 +445,12 @@ INSTALL_HELPER() {
     rm -f ~/gridnode
     while [[ ! -f ~/gridnode ]] || [[ $(grep -Fxc "# End of script." ~/gridnode) -eq 0 ]]; do
         rm -f ~/gridnode
-        echo "Downloading Helper Script."
+        echo "Downloading Gridnode Helper Script."
         wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/gridnode -O ~/gridnode
         COUNTER=1
         if [[ "${COUNTER}" -gt 3 ]]; then
             echo
-            echo "Download of docker script failed."
+            echo "Download of gridnode helper script failed."
             echo
             exit 1
         fi
