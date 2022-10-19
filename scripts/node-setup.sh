@@ -441,21 +441,21 @@ COIN_CONF
 
 INSTALL_HELPER() {
     COUNTER=0
-    rm -f ~/gridnode
-    while [[ ! -f ~/gridnode ]] || [[ $(grep -Fxc "# End of script." ~/gridnode) -eq 0 ]]; do
-        rm -f ~/gridnode
-        echo "Downloading Gridnode Helper Script."
-        wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/gridnode -O ~/gridnode
+    rm -f ~/unigrid
+    while [[ ! -f ~/unigrid ]] || [[ $(grep -Fxc "# End of script." ~/unigrid) -eq 0 ]]; do
+        rm -f ~/unigrid
+        echo "Downloading Unigrid Helper Script."
+        wget -4qo- https://raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/unigrid -O ~/unigrid
         COUNTER=1
         if [[ "${COUNTER}" -gt 3 ]]; then
             echo
-            echo "Download of gridnode helper script failed."
+            echo "Download of unigrid helper script failed."
             echo
             exit 1
         fi
     done
-    sudo mv ~/gridnode /usr/bin/
-    sudo chmod +x /usr/bin/gridnode
+    sudo mv ~/unigrid /usr/bin/
+    sudo chmod +x /usr/bin/unigrid
 }
 
 INSTALL_COMPLETE() {
