@@ -47,6 +47,8 @@ PRIVATEADDRESS=127.0.0.1
 # Regex to check if output is a number.
 RE='^[0-9]+$'
 GN_KEY=''
+DAY_ARRAY=(86400 172800 259200)
+DAY_INTERVAL=''
 
 ASCII_ART
 
@@ -377,18 +379,28 @@ INSTALL_NEW_NODE() {
         unigrid/unigrid:"${IMAGE_SOURCE}"
 }
 
+SET_RANDOM_UPDATE_TIME() {
+    # sets interval for watchtower to check for updates
+    # either 1, 2, or 3 days
+    RANDOM_NUMBER=$(( ( RANDOM % 3 ) ))
+    DAY_INTERVAL="${DAY_ARRAY[RANDOM_NUMBER]}"
+    #echo "${RANDOM_NUMBER}"
+    echo "watchtower check for update interval: ${DAY_INTERVAL}"
+}
+
 INSTALL_WATCHTOWER() {
     # Run watchtower if not found
     CHECK_WATCHTOWER="$(docker ps -f name=watchtower | grep -w watchtower)"
     sleep 0.1
     if [ -z "${CHECK_WATCHTOWER}" ]; then
+        SET_RANDOM_UPDATE_TIME
         echo -e "${GREEN}Installing watchtower"
         # TODO add random intervals for watchtower check
         docker run -d \
             --name watchtower \
             -v /var/run/docker.sock:/var/run/docker.sock \
             containrrr/watchtower -c \
-            --trace --include-restarting --interval 30
+            --trace --include-restarting --interval "${DAY_INTERVAL}"
     else
         echo -e "${CYAN}Watchtower already intalled... skipping"
     fi
