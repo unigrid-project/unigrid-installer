@@ -11,6 +11,4 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-ins
 
 After install you can call the running container with different commands. On the first install the container name will be `ugd_docker_1`. To call check the current block you can use `ugd_docker_1 getblockcount`.
 
-Another set of convenience commands are under `gridnode help`.
-
-
+Another set of convenience commands that run on all containers are under `unigrid help`.
