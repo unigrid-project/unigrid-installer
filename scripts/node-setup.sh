@@ -576,7 +576,7 @@ INSTALL_COMPLETE() {
     echo -e "${GREEN}docker --help"
     echo 
     echo -e "${BLUE}There are also a set of helper commands for all containers."
-    echo -e "For a list of commands type 'gridnode help'"
+    echo -e "For a list of commands type 'unigrid help'"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
