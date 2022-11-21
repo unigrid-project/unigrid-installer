@@ -487,7 +487,13 @@ INSTALL_COMPLETE() {
     # Add commands to .bash_aliases
     BASH_ALIASES='.bash_aliases'
     SINGLE_QUOTE="'"
-    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
+    if [[ "${IMAGE_SOURCE}" = "testnet" ]];
+    then
+    TESTNET="-${IMAGE_SOURCE}"
+    else
+    TESTNET=""
+    fi
+    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
     if [ "$COMMAND" != "" ]; then
         echo $COMMAND >>~/$BASH_ALIASES
         . ~/.bashrc
