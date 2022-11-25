@@ -444,8 +444,8 @@ daemon=1
 logtimestamps=1
 listen=1
 bind=${BIND}
-masternodeprivkey=${GN_KEY}
-masternode=1
+gridnodeprivkey=${GN_KEY}
+gridnode=1
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
@@ -567,7 +567,7 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}To call the unigrid daemon use..."
     echo -e "${GREEN}${NEW_SERVER_NAME} getblockcount"
     echo -e "${ORANGE}Once you have started your gridnode from your local wallet"
-    echo -e "${GREEN}${NEW_SERVER_NAME} masternodedebug"
+    echo -e "${GREEN}${NEW_SERVER_NAME} gridnodedebug"
     echo -e "${CYAN}Some commands may not work immediately until the wallet fully syncs."
     echo
     echo -e "${CYAN}To access the container you can type..."
@@ -586,7 +586,7 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
-    echo -e "${GREEN}Add the below info to your masternode.conf file."
+    echo -e "${GREEN}Add the below info to your gridnode.conf file."
     echo -e "The info is also stored in a file ~/$FILENAME"
     echo -e
     echo -e "${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"

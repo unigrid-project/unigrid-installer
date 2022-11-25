@@ -50,7 +50,7 @@ DEBUG() {
     for s in "${ARR[@]}"; do
         if [[ "$s" != 'watchtower' ]]; then
             echo -e "${BLUE}${s}"
-            docker exec -i "${s}" ugd_service unigrid masternodedebug
+            docker exec -i "${s}" ugd_service unigrid gridnodedebug
         fi
     done
 }
