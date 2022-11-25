@@ -49,6 +49,7 @@ RE='^[0-9]+$'
 GN_KEY=''
 DAY_ARRAY=(86400 172800 259200)
 DAY_INTERVAL=''
+TESTNET=""
 
 ASCII_ART
 
@@ -528,9 +529,9 @@ INSTALL_COMPLETE() {
         TASK=''
         STATUS=''
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
-            BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+            BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid ${TESTNET} getblockcount)
             sleep 0.1
-            BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getbootstrappinginfo)
+            BOOT_STRAPPING=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid ${TESTNET} getbootstrappinginfo)
             sleep 0.1
             echo "${BOOT_STRAPPING}" >>data.json
             PROGRESS=$(jq -r '.progress' data.json)
