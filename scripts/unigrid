@@ -150,6 +150,7 @@ REMOVE_ALL() {
     CONFIRM_RUN
     FIND_DOCKER_IMAGES
     FIND_VOLUMES
+    rm -rf .bash_aliases gridnodes.txt
 }
 
 case "$1" in
