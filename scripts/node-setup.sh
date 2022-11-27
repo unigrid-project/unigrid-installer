@@ -573,17 +573,10 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo -e "${GREEN}docker exec -it ${NEW_SERVER_NAME} /bin/bash"
-    echo
-    echo -e "${CYAN}To restart your docker container."
-    echo -e "${GREEN}docker restart ${NEW_SERVER_NAME}"
-    echo -e "${CYAN}To see a full list of all containers use..."
-    echo -e "${GREEN}docker ps"
-    echo
-    echo -e "${CYAN}For help"
-    echo -e "${GREEN}docker --help"
     echo 
     echo -e "${BLUE}There are also a set of helper commands for all containers."
-    echo -e "For a list of commands type 'unigrid help'"
+    echo -e "For a list of commands type..."
+    echo -e "${GREEN}unigrid help"
     echo
     echo -e "${CYAN}If you would like to install another node simply run this script again."
     echo
