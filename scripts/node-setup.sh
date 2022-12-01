@@ -424,6 +424,14 @@ CREATE_CONF_FILE() {
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
     # :${PORTB}"
+     if [[ "${IMAGE_SOURCE}" = "testnet" ]];
+    then
+    PRIV_KEY="gridnodeprivkey=${GN_KEY}"
+    NODE_NAME="gridnode=1"
+    else
+    PRIV_KEY="masternodeprivkey=${GN_KEY}"
+    NODE_NAME="masternode=1"
+    fi
     touch "${HOME}/${CONF}"
     cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
@@ -445,8 +453,8 @@ daemon=1
 logtimestamps=1
 listen=1
 bind=${BIND}
-gridnodeprivkey=${GN_KEY}
-gridnode=1
+${PRIV_KEY}
+${NODE_NAME}
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
