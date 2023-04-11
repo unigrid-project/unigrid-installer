@@ -494,7 +494,7 @@ INSTALL_COMPLETE() {
     else
         TESTNET=""
     fi
-    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
+    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ sudo docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
     if [ "$COMMAND" != "" ]; then
         echo $COMMAND >>$HOME/$BASH_ALIASES
         . $HOME/.bashrc
