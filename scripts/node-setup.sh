@@ -383,7 +383,7 @@ INSTALL_NEW_NODE() {
 SET_RANDOM_UPDATE_TIME() {
     # sets interval for watchtower to check for updates
     # either 1, 2, or 3 days
-    RANDOM_NUMBER=$(( ( RANDOM % 3 ) ))
+    RANDOM_NUMBER=$(((RANDOM % 3)))
     DAY_INTERVAL="${DAY_ARRAY[RANDOM_NUMBER]}"
     #echo "${RANDOM_NUMBER}"
     echo "watchtower check for update interval: ${DAY_INTERVAL}"
@@ -424,13 +424,12 @@ CREATE_CONF_FILE() {
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
     # :${PORTB}"
-     if [[ "${IMAGE_SOURCE}" = "testnet" ]];
-    then
-    PRIV_KEY="gridnodeprivkey=${GN_KEY}"
-    NODE_NAME="gridnode=1"
+    if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
+        PRIV_KEY="gridnodeprivkey=${GN_KEY}"
+        NODE_NAME="gridnode=1"
     else
-    PRIV_KEY="masternodeprivkey=${GN_KEY}"
-    NODE_NAME="masternode=1"
+        PRIV_KEY="masternodeprivkey=${GN_KEY}"
+        NODE_NAME="masternode=1"
     fi
     touch "${HOME}/${CONF}"
     cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
@@ -490,16 +489,15 @@ INSTALL_COMPLETE() {
     # Add commands to .bash_aliases
     BASH_ALIASES='.bash_aliases'
     SINGLE_QUOTE="'"
-    if [[ "${IMAGE_SOURCE}" = "testnet" ]];
-    then
-    TESTNET="-${IMAGE_SOURCE}"
+    if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
+        TESTNET="-${IMAGE_SOURCE}"
     else
-    TESTNET=""
+        TESTNET=""
     fi
     COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
     if [ "$COMMAND" != "" ]; then
-        echo $COMMAND >>~/$BASH_ALIASES
-        . ~/.bashrc
+        echo $COMMAND >>$HOME/$BASH_ALIASES
+        . $HOME/.bashrc
     fi
     # Add helper commands to /usr/bin
     INSTALL_HELPER
@@ -575,7 +573,7 @@ INSTALL_COMPLETE() {
     echo
     echo -e "${CYAN}To access the container you can type..."
     echo -e "${GREEN}docker exec -it ${NEW_SERVER_NAME} /bin/bash"
-    echo 
+    echo
     echo -e "${BLUE}There are also a set of helper commands for all containers."
     echo -e "For a list of commands type..."
     echo -e "${GREEN}unigrid help"
