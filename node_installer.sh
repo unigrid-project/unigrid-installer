@@ -17,9 +17,9 @@
 # Run this file
 
 ```
-bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
+sudo bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
 
-bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' testnet
+sudo bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' testnet
 ```
 
 '

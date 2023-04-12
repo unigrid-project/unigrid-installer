@@ -487,16 +487,20 @@ INSTALL_COMPLETE() {
         ${ASCII_ART}
     fi
     # Add commands to .bash_aliases
-    BASH_ALIASES='.bash_aliases'
+    BASH_ALIASES="$HOME/.bash_aliases"
     SINGLE_QUOTE="'"
+
     if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
         TESTNET="-${IMAGE_SOURCE}"
     else
         TESTNET=""
     fi
+
     COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ sudo docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
+
     if [ "$COMMAND" != "" ]; then
-        echo $COMMAND >>$HOME/$BASH_ALIASES
+        echo $COMMAND >>$BASH_ALIASES
+        . $BASH_ALIASES
         . $HOME/.bashrc
     fi
     # Add helper commands to /usr/bin
