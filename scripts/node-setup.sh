@@ -26,6 +26,7 @@ CYAN='\033[0;36m'
 BLUE="\033[1;34m"
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+WHITE='\033[0;37m'
 BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
@@ -415,7 +416,7 @@ CREATE_CONF_FILE() {
     else
         PWA="$(pwgen -1 -s 44)"
     fi
-    echo - "generated rpc password: ${PWA}"
+    echo - "generated rpc password: ${PWA}"ugd_docker_1 getblockcount
     PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
@@ -588,6 +589,8 @@ INSTALL_COMPLETE() {
     echo -e "The info is also stored in a file ~/$FILENAME"
     echo -e
     echo -e "${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    echo
+    echo -e "${WHITE}Install complete!"
     echo
     stty sane 2>/dev/null
 }

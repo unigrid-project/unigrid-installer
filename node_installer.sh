@@ -43,7 +43,7 @@ ASCII_ART() {
 | |_| | |\  || | |_| |  _ < | || |_| |
  \___/|_| \_|___\____|_| \_\___|____/
 
-Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB 
+Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB 
 
 UNIGRID
 }
