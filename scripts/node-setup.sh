@@ -564,7 +564,7 @@ INSTALL_COMPLETE() {
             break
         fi
     done
-
+    . ${HOME}/.bashrc
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
     echo
@@ -610,7 +610,7 @@ START_INSTALL() {
 
     rm -f ~/___gn.sh install.sh
 
-    . ~/.bashrc
+    source ~/.bashrc
 
 }
 # End of gridnode setup script.
