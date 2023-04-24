@@ -566,17 +566,17 @@ INSTALL_COMPLETE() {
         rm -f data.json
     fi
 
-    COUNTER=0
     i=0
-    while [[ "$COUNTER" -le "30" ]]; do
+    COUNTER=0
+    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
+
+    while [[ "${BLOCK_COUNT}" = "-1" ]] || [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
         echo -en "\\r${ORANGE}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
         sleep 1
         COUNTER=$((COUNTER + 1))
-        if [[ "$COUNTER" -ge "30" ]]; then
-            echo
-            break
-        fi
+        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
     done
+
     . ${HOME}/.bashrc
     echo -e "${GREEN}Current block"
     docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount
