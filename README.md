@@ -6,9 +6,9 @@ To use the script copy and paste this into your server terminal window. You will
 ```
 bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
 ```
-# TESTNET
+# BETA
 ```
- bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' testnet
+bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' beta ; source ~/.bashrc
  ```
 # Commands
 

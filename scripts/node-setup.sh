@@ -27,6 +27,7 @@ BLUE="\033[1;34m"
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 WHITE='\033[0;37m'
+NC='\033[0m'
 BASE_NAME='ugd_docker_'
 SERVER_NAME=''
 DATA_VOLUME='data_volume_'
@@ -520,13 +521,26 @@ INSTALL_COMPLETE() {
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
         echo -e "Checking if the container has started."
-        if [[ "${BLOCK_COUNT}" = '' ]]; then
-            while [ "${BLOCK_COUNT}" = '' ]; do
-                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+
+        SP="/-\\|"
+        i=0
+
+        while [[ "${BLOCK_COUNT}" = '' ]] || [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
+            if [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; then
+                while [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
+                    echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection...\033[K"
+                    sleep 1
+                    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+                done
+            else
                 sleep 1
-            done
-        fi
+                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+            fi
+        done
+
+        echo -e "\r${GREEN}Connected!${NC}"
 
         sleep 0.5
         touch data.json
@@ -590,7 +604,7 @@ INSTALL_COMPLETE() {
     echo -e
     echo -e "${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
     echo
-    echo -e "${WHITE}Install complete!"
+    echo -e "${CYAN}Install complete!${NC}"
     echo
     stty sane 2>/dev/null
 }

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 # shellcheck disable=SC2034
 # Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
@@ -17,9 +17,9 @@
 # Run this file
 
 ```
-sudo bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" ; source ~/.bashrc
 
-sudo bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' testnet
+bash -c "$(wget -qO - raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)" '' beta ; source ~/.bashrc
 ```
 
 '
