@@ -520,11 +520,8 @@ INSTALL_COMPLETE() {
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
-        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
-        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
         echo -e "Checking if the container has started."
-
-        SP="/-\\|"
         i=0
 
         while [[ "${BLOCK_COUNT}" = '' ]] || [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
@@ -532,21 +529,22 @@ INSTALL_COMPLETE() {
                 while [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
                     echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection...\033[K"
                     sleep 1
-                    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+                    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
                 done
             else
                 sleep 1
-                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount)
+                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
             fi
         done
 
-        echo -e "\r${GREEN}Connected!${NC}"
+        echo -e "\r${GREEN}Connected!${NC}                                    "
 
         sleep 0.5
         touch data.json
         PROGRESS=''
         TASK=''
         STATUS=''
+        i=0
         while [[ "$BLOCK_COUNT" = "-1" ]]; do
             BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid ${TESTNET} getblockcount)
             sleep 0.1
@@ -569,6 +567,7 @@ INSTALL_COMPLETE() {
     fi
 
     COUNTER=0
+    i=0
     while [[ "$COUNTER" -le "30" ]]; do
         echo -en "\\r${ORANGE}${SP:i++%${#SP}:1}Loading the Unigrid backend... ${COUNTER} \\c/r\033[K"
         sleep 1
