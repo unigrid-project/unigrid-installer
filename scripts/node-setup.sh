@@ -575,6 +575,7 @@ INSTALL_COMPLETE() {
         sleep 1
         COUNTER=$((COUNTER + 1))
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
+        echo "DEBUG: BLOCK_COUNT=${BLOCK_COUNT}" # Debug message
     done
 
     . ${HOME}/.bashrc
