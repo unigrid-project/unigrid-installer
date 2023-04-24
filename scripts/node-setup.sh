@@ -520,20 +520,20 @@ INSTALL_COMPLETE() {
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
         # FOR LOOP TO CHECK CHAIN IS SYNCED
-        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
+        BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
         echo -e "Checking if the container has started."
         i=0
 
         while [[ "${BLOCK_COUNT}" = '' ]] || [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
             if [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; then
                 while [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
-                    echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection...\033[K"
+                    echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection... (${SECONDS} s)\033[K"
                     sleep 1
-                    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
+                    BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
                 done
             else
                 sleep 1
-                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>/dev/null)
+                BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
             fi
         done
 
