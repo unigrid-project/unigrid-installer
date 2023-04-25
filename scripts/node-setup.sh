@@ -527,7 +527,7 @@ INSTALL_COMPLETE() {
         while [[ "${BLOCK_COUNT}" = '' ]] || [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
             if [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; then
                 while [[ "${BLOCK_COUNT}" =~ "error: couldn't connect to server" ]]; do
-                    echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection... (${SECONDS} s)\033[K"
+                    echo -en "\r${GREEN}${SP:i++%${#SP}:1}${NC} Waiting for connection... (${SECONDS} s)\e[K"
                     sleep 1
                     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
                 done
