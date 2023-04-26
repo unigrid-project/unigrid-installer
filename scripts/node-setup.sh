@@ -475,7 +475,7 @@ INSTALL_HELPER() {
 }
 
 INSTALL_COMPLETE() {
-    CURRENT_CONTAINER_ID=$(echo $(sudo docker ps -aqf name="${NEW_SERVER_NAME}"))
+    CURRENT_CONTAINER_ID=$(echo $(docker ps -aqf name="${NEW_SERVER_NAME}"))
     CREATE_CONF_FILE
     sleep 0.5
     echo
@@ -498,7 +498,7 @@ INSTALL_COMPLETE() {
         TESTNET=""
     fi
 
-    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ sudo docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
+    COMMAND="alias ${NEW_SERVER_NAME}=${SINGLE_QUOTE}${NEW_SERVER_NAME}(){ docker exec -i ${NEW_SERVER_NAME} ugd_service unigrid ${TESTNET} \$@;}; ${NEW_SERVER_NAME}${SINGLE_QUOTE}"
 
     if [ "$COMMAND" != "" ]; then
         echo $COMMAND >>$BASH_ALIASES
