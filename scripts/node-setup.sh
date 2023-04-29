@@ -565,7 +565,9 @@ INSTALL_COMPLETE() {
 
         rm -f data.json
     fi
-
+    # Restart the service
+    RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
+    echo "$RESTART_SERVICE"
     i=0
     COUNTER=0
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
