@@ -172,7 +172,7 @@ help)
     # show list of commands
     SHOW_ASCII
     echo
-    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all <COMMAND>}${NC}"
+    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all|resync-node <COMMAND>}${NC}"
     echo
     exit 1
     ;;
