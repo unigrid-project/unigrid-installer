@@ -477,10 +477,9 @@ INSTALL_HELPER() {
 CHECK_OTHER_CONFS() {
     # Get the list of all container names that match the pattern ugd_docker_*
     container_names=$(docker ps -a --filter "name=ugd_docker_*" --format "{{.Names}}")
-     echo "Performing an automatic repair of olders installs."
+    echo "Performing an automatic repair of olders installs."
     # Iterate over each container name and modify the file if it contains masternodeprivkey and masternode
-    for container_name in $container_names
-    do
+    for container_name in $container_names; do
         echo "Checking if file in container $container_name contains masternodeprivkey and masternode"
         # Create a temporary directory to store the modified file
         mkdir tmp
@@ -606,9 +605,7 @@ INSTALL_COMPLETE() {
 
         rm -f data.json
     fi
-    # Restart the service
-    RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
-    echo "$RESTART_SERVICE"
+
     i=0
     COUNTER=0
     BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
@@ -618,7 +615,17 @@ INSTALL_COMPLETE() {
         sleep 1
         COUNTER=$((COUNTER + 1))
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
-        #echo "DEBUG: BLOCK_COUNT=${BLOCK_COUNT}" # Debug message
+        if [ $COUNTER -eq 120 ]; then
+            echo "Restarting container and retrying..."
+            docker restart "${CURRENT_CONTAINER_ID}"
+            RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
+            echo "$RESTART_SERVICE"
+            COUNTER=0
+        fi
+        if [ $COUNTER -eq 240 ]; then
+            echo "Something went wrong. Try running 'docker restart ${CURRENT_CONTAINER_ID}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
+            exit 1
+        fi
     done
 
     . ${HOME}/.bashrc
