@@ -21,6 +21,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 ORANGE='\033[0;33m'
 NAME='unigrid'
+NC='\033[0m'
 
 ASCII_ART() {
     echo -e "${ORANGE}"
@@ -62,7 +63,7 @@ GET_BLOCKS() {
     declare -a ARR=($CONTAINERS)
     for s in "${ARR[@]}"; do
         if [[ "$s" != 'watchtower' ]]; then
-            echo -e "${BLUE}${s}"
+            echo -e "${BLUE}${s}${NC}"
             docker exec -i "${s}" ugd_service unigrid getblockcount
         fi
     done
@@ -74,17 +75,17 @@ GET_LIST() {
 }
 
 RESTART_ALL() {
-    echo -e "${BLUE}Restarting all gridnode containers"
+    echo -e "${BLUE}Restarting all gridnode containers${NC}"
     docker restart $(docker ps -q)
 }
 
 STOP_ALL() {
-    echo -e "${BLUE}Stopping all gridnode containers"
+    echo -e "${BLUE}Stopping all gridnode containers${NC}"
     docker stop $(docker ps -a -q)
 }
 
 START_ALL() {
-    echo -e "${BLUE}Starting all gridnode containers"
+    echo -e "${BLUE}Starting all gridnode containers${NC}"
     docker start $(docker ps -a -q)
 }
 
@@ -102,7 +103,7 @@ CONFIRM_RUN() {
         echo -e "${RED}Warning!"
         echo -e "Running this script will delete all Unigrid containers and volumes on this machine."
         echo -e "${CYAN}"
-        read -p "Are you sure you want to run this script?" yn
+        read -p "Are you sure you want to run this script?${NC}" yn
         echo
         echo
         case $yn in
@@ -123,11 +124,11 @@ FIND_DOCKER_IMAGES() {
     FILTERED_ARRAY=()
     for s in "${ARR[@]}"; do
         if [[ "${s:0:3}" = 'ugd' ]]; then
-            echo -e "Found container name: ${s}"
+            echo -e "Found container name: ${s}${NC}"
             FILTERED_ARRAY+=("${s}")
         fi
     done
-    echo -e "${BLUE}Remove containers" "${FILTERED_ARRAY[@]}"
+    echo -e "${BLUE}Remove containers${NC}" "${FILTERED_ARRAY[@]}"
     docker rm "${FILTERED_ARRAY[@]}" --force
 }
 
@@ -138,11 +139,11 @@ FIND_VOLUMES() {
     FILTERED_ARRAY=()
     for s in "${ARR[@]}"; do
         if [[ "${s:0:11}" = 'data_volume' ]]; then
-            echo -e "Found volume name: ${s}"
+            echo -e "Found volume name: ${s}${NC}"
             FILTERED_ARRAY+=("${s}")
         fi
     done
-    echo -e "${BLUE}Remove containers" "${FILTERED_ARRAY[@]}"
+    echo -e "${BLUE}Remove containers${NC}" "${FILTERED_ARRAY[@]}"
     docker volume rm "${FILTERED_ARRAY[@]}"
 }
 
@@ -153,12 +154,25 @@ REMOVE_ALL() {
     rm -rf .bash_aliases gridnodes.txt
 }
 
+RESYNC_GRIDNODE() {
+    local s=$1
+    echo -e "${BLUE}Stopping service in: ${s}"
+    docker exec -i "${s}" ugd_service stop
+    echo -e "${BLUE}Removing local copy of blockchain in: ${s}"
+    docker exec -i "${s}" rm -rf /root/.unigrid/database /root/.unigrid/blocks /root/.unigrid/chainstate /root/.unigrid/sporks /root/.unigrid/zerocoin
+    docker exec -i "${s}" ugd_service start
+    echo -e "${BLUE}Gridnode is restarting in: ${s}"
+    echo -e "${BLUE}Please allow for some time as this will download the chain and uncompress it again."
+    echo -e "${ORANGE}${s} getbootstrappinginfo${NC}"
+    echo
+}
+
 case "$1" in
 help)
     # show list of commands
     SHOW_ASCII
     echo
-    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all <COMMAND>}"
+    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all <COMMAND>}${NC}"
     echo
     exit 1
     ;;
@@ -210,9 +224,24 @@ remove-all)
     REMOVE_ALL
     echo
     ;;
+resync-node)
+    if [[ -z "$2" ]]; then
+        echo -e "${RED}Missing container name, use '${NAME} help' for more info.${NC}"
+        exit 1
+    fi
+
+    if ! docker inspect "${2}" &>/dev/null; then
+        echo -e "${RED}Container not found: ${2}${NC}"
+        exit 1
+    fi
+
+    SHOW_ASCII
+    RESYNC_GRIDNODE "${2}"
+    echo
+    ;;
 *)
     SHOW_ASCII
-    echo -e "${RED}Missing command, use '${NAME} help' for more info."
+    echo -e "${RED}Missing command, use '${NAME} help' for more info.${NC}"
     exit 1
     ;;
 esac

@@ -366,6 +366,8 @@ INSTALL_NEW_NODE() {
     echo -e "PORT: ${PORTB}"
 
     echo "Copy Volume and run"
+    # Pause a container
+    docker pause ${DATA_VOLUME}1
     docker run --rm \
         -i \
         -d \
@@ -374,12 +376,15 @@ INSTALL_NEW_NODE() {
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
     echo "Done copying volume"
+    docker unpause ${DATA_VOLUME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
         -p "${PORTB}:${PORTB}" \
         -p "${PORTA}:${PORTA}" \
         --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
         --restart unless-stopped \
         unigrid/unigrid:"${IMAGE_SOURCE}"
+    sleep 0.1
+    sync
 }
 
 SET_RANDOM_UPDATE_TIME() {
@@ -616,11 +621,11 @@ INSTALL_COMPLETE() {
         COUNTER=$((COUNTER + 1))
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
         if [ $COUNTER -eq 120 ]; then
+            echo
             echo "Restarting container and retrying..."
             docker restart "${CURRENT_CONTAINER_ID}"
             RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
             echo "$RESTART_SERVICE"
-            COUNTER=0
         fi
         if [ $COUNTER -eq 240 ]; then
             echo "Something went wrong. Try running 'docker restart ${CURRENT_CONTAINER_ID}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
