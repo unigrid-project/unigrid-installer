@@ -457,7 +457,7 @@ ${PRIV_KEY}
 ${NODE_NAME}
 COIN_CONF
     docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
-    rm -f "${HOME}/${CONF}"
+    #rm -f "${HOME}/${CONF}"
 }
 
 INSTALL_HELPER() {
