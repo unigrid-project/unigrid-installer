@@ -635,7 +635,12 @@ INSTALL_COMPLETE() {
         fi
         if [ $COUNTER -eq 240 ]; then
             echo
-            echo "Something went wrong. Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
+            echo "${RED}Something went wrong."
+            echo "${BLUE}Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
+            echo "${BLUE}If the block count is very low, you can try running this command to resync the chain."
+            echo "${BLUE}This will remove the chain data in that container only and let it resync from the bootstrap."
+            echo "${ORANGE}unigrid resync-node ${NEW_SERVER_NAME}${NC}"
+            echo
             exit 1
         fi
     done
