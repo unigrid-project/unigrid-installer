@@ -158,10 +158,11 @@ RESYNC_GRIDNODE() {
     local s=$1
     echo -e "${BLUE}Stopping service in: ${s}"
     docker exec -i "${s}" ugd_service stop
+    sleep 2
     echo -e "${BLUE}Removing local copy of blockchain in: ${s}"
     docker exec -i "${s}" rm -rf /root/.unigrid/database /root/.unigrid/blocks /root/.unigrid/chainstate /root/.unigrid/sporks /root/.unigrid/zerocoin
     docker exec -i "${s}" ugd_service start
-    echo -e "${BLUE}Gridnode is restarting in: ${s}"
+    echo -e "${GREEN}Gridnode is restarting in: ${s}"
     echo -e "${BLUE}Please allow for some time as this will download the chain and uncompress it again."
     echo -e "${ORANGE}${s} getbootstrappinginfo${NC}"
     echo
