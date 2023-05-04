@@ -455,7 +455,9 @@ ${NODE_NAME}
 COIN_CONF
     cat "${HOME}/${CONF}"
     echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
-    docker cp -f "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
+    sync
+    docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
+    sync
     docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
