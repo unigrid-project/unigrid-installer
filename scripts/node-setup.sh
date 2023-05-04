@@ -431,13 +431,10 @@ CREATE_CONF_FILE() {
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
     # :${PORTB}"
-    if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
-        PRIV_KEY="gridnodeprivkey=${GN_KEY}"
-        NODE_NAME="gridnode=1"
-    else
-        PRIV_KEY="gridnodeprivkey=${GN_KEY}"
-        NODE_NAME="gridnode=1"
-    fi
+
+    PRIV_KEY="gridnodeprivkey=${GN_KEY}"
+    NODE_NAME="gridnode=1"
+
     touch "${HOME}/${CONF}"
     cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
@@ -456,7 +453,8 @@ bind=${BIND}
 ${PRIV_KEY}
 ${NODE_NAME}
 COIN_CONF
-    docker cp "${HOME}/${CONF}" "${CURRENT_CONTAINER_ID}":"${USR_HOME}/${DIRECTORY}/${CONF}"
+    echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
+    docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
 
@@ -521,15 +519,16 @@ CHECK_OTHER_CONFS() {
 INSTALL_COMPLETE() {
     CHECK_OTHER_CONFS
     CURRENT_CONTAINER_ID=$(echo $(docker ps -aqf name="${NEW_SERVER_NAME}"))
+
+    ASCII_ART
+    echo
     CREATE_CONF_FILE
     sleep 0.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
     echo -e "New container name: ${NEW_SERVER_NAME}"
-
-    ASCII_ART
-
+    echo
     if [[ "${ASCII_ART}" ]]; then
         ${ASCII_ART}
     fi
@@ -630,7 +629,8 @@ INSTALL_COMPLETE() {
             echo "$RESTART_SERVICE"
         fi
         if [ $COUNTER -eq 240 ]; then
-            echo "Something went wrong. Try running 'docker restart ${CURRENT_CONTAINER_ID}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
+            echo
+            echo "Something went wrong. Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
             exit 1
         fi
     done
