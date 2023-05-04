@@ -375,6 +375,7 @@ INSTALL_NEW_NODE() {
         -v ${DATA_VOLUME}1:/from \
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
+    sync
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
@@ -453,12 +454,12 @@ bind=${BIND}
 ${PRIV_KEY}
 ${NODE_NAME}
 COIN_CONF
-    cat "${HOME}/${CONF}"
+    #cat "${HOME}/${CONF}"
     echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
-    docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
+    #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
 
@@ -514,7 +515,7 @@ CHECK_OTHER_CONFS() {
         else
             echo "File in container $container_name does not contain masternodeprivkey and masternode"
         fi
-
+        sync
         # Remove the temporary directory and its contents
         rm -rf tmp
     done
