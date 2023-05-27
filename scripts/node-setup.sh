@@ -42,14 +42,15 @@ TX_DETAILS=()
 USR_HOME='/root'
 DIRECTORY='.unigrid'
 CONF='unigrid.conf'
-PORTA='0'
-PORTB='0'
+PORT_TXT='port.txt'
+PORT_TCP='0'
+PORT_UDP='0'
 CURRENT_CONTAINER_ID=''
 PRIVATEADDRESS=127.0.0.1
 # Regex to check if output is a number.
 RE='^[0-9]+$'
 GN_KEY=''
-DAY_ARRAY=(86400 172800 259200)
+DAY_ARRAY=(43200 86400 172800)
 DAY_INTERVAL=''
 TESTNET=""
 
@@ -106,17 +107,14 @@ PRE_INSTALL_CHECK() {
             sudo ufw allow "${SSH_PORT_SETTING}" >/dev/null 2>&1
         fi
     fi
-    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    while [[ -z "${PORT_TCP}" || "${PORT_TCP}" = "0" ]]; do
+        PORT_TCP=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
     done
-    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
-        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    while [[ -z "${PORT_UDP}" || "${PORT_UDP}" = "0" ]]; do
+        PORT_UDP=$(FIND_FREE_UDP_PORT)
     done
-    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTB}$")" -eq 0 ]]; then
-        sudo ufw allow "${PORTB}"
-    fi
-    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORTA}$")" -eq 0 ]]; then
-        sudo ufw allow "${PORTA}"
+    if [[ "$(sudo ufw status | grep -v '(v6)' | awk '{print $1}' | grep -c "^${PORT_TCP}$")" -eq 0 ]]; then
+        sudo ufw allow "${PORT_TCP}"
     fi
 
     echo "y" | sudo ufw enable >/dev/null 2>&1
@@ -218,6 +216,30 @@ GET_TXID() {
     done
 }
 
+FIND_FREE_UDP_PORT() {
+    # Define the range of ports to check
+    LOWERPORT=32769
+    UPPERPORT=60998
+
+    # Extract the list of used ports from the UFW rules
+    USED_PORTS=$(sudo ufw status verbose | grep '/udp' | awk '{print $1}' | cut -d '/' -f1)
+
+    # Loop until we find an unused port
+    while :; do
+        # Generate a random port number in the range
+        PORT_TO_TEST=$(shuf -i "${LOWERPORT}"-"${UPPERPORT}" -n 1)
+
+        # Check if the port is in the list of used ports
+        if ! echo "${USED_PORTS}" | grep -q "^${PORT_TO_TEST}$"; then
+            # If the port is not in the list of used ports, add it to UFW rules
+            sudo ufw allow "${PORT_TO_TEST}"/udp >/dev/null
+            # Print the port number and return
+            echo "${PORT_TO_TEST}"
+            return
+        fi
+    done
+}
+
 CHECK_FOR_NODE_INSTALL() {
     CHECK_NODE="$(docker ps -a -f name=ugd_docker_1 | grep -w ugd_docker_1)"
     if [ -z "${CHECK_NODE}" ]; then
@@ -227,8 +249,8 @@ CHECK_FOR_NODE_INSTALL() {
             --name="${NEW_SERVER_NAME}" \
             --mount source="${DATA_VOLUME}1",destination=/root/.unigrid \
             --restart unless-stopped \
-            -p "${PORTB}:${PORTB}" \
-            -p "${PORTA}:${PORTA}" unigrid/unigrid:"${IMAGE_SOURCE}"
+            -p "${PORT_UDP}:${PORT_UDP}/udp" \
+            -p "${PORT_TCP}:${PORT_TCP}" unigrid/unigrid:"${IMAGE_SOURCE}"
     else
         echo -e "${CYAN}1st node already installed"
         INSTALL_NEW_NODE
@@ -323,7 +345,6 @@ FIND_FREE_PORT() {
         fi
         break
     done
-    #PORTB=$PORT_TO_TEST
     echo "${PORT_TO_TEST}"
 }
 
@@ -356,14 +377,12 @@ INSTALL_NEW_NODE() {
     NEW_VOLUME_NAME=${DATA_VOLUME}${NODE_NUMBER}
     echo ${NEW_VOLUME_NAME}
 
-    while [[ -z "${PORTB}" || "${PORTB}" = "0" ]]; do
-        PORTB=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    while [[ -z "${PORT_TCP}" || "${PORT_TCP}" = "0" ]]; do
+        PORT_TCP=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
     done
-    while [[ -z "${PORTA}" || "${PORTA}" = "0" ]]; do
-        PORTA=$(FIND_FREE_PORT "${PRIVATEADDRESS}" | tail -n 1)
+    while [[ -z "${PORT_UDP}" || "${PORT_UDP}" = "0" ]]; do
+        PORT_UDP=$(FIND_FREE_UDP_PORT)
     done
-
-    echo -e "PORT: ${PORTB}"
 
     echo "Copy Volume and run"
     # Pause a container
@@ -379,8 +398,8 @@ INSTALL_NEW_NODE() {
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
-        -p "${PORTB}:${PORTB}" \
-        -p "${PORTA}:${PORTA}" \
+        -p "${PORT_UDP}:${PORT_UDP}/udp" \
+        -p "${PORT_TCP}:${PORT_TCP}" \
         --mount source=${NEW_VOLUME_NAME},destination=/root/.unigrid \
         --restart unless-stopped \
         unigrid/unigrid:"${IMAGE_SOURCE}"
@@ -390,7 +409,7 @@ INSTALL_NEW_NODE() {
 
 SET_RANDOM_UPDATE_TIME() {
     # sets interval for watchtower to check for updates
-    # either 1, 2, or 3 days
+    # either 0, 1, or 2 days
     RANDOM_NUMBER=$(((RANDOM % 3)))
     DAY_INTERVAL="${DAY_ARRAY[RANDOM_NUMBER]}"
     #echo "${RANDOM_NUMBER}"
@@ -409,9 +428,20 @@ INSTALL_WATCHTOWER() {
             --name watchtower \
             -v /var/run/docker.sock:/var/run/docker.sock \
             containrrr/watchtower -c \
+            --enable-lifecycle-hooks \
             --trace --include-restarting --interval "${DAY_INTERVAL}"
     else
-        echo -e "${CYAN}Watchtower already intalled... skipping"
+        echo -e "${CYAN}Watchtower already intalled... checking if lifecycle-hooks are enabled"
+        if docker inspect --format='{{.Config.Cmd}}' watchtower | grep -q -- '--enable-lifecycle-hooks'; then
+            echo "Lifecycle hooks are enabled."
+        else
+            echo "Lifecycle hooks are not enabled."
+            # Stop the existing watchtower container if it's running
+            docker stop watchtower
+            # Remove the existing watchtower container
+            docker rm watchtower
+            INSTALL_WATCHTOWER
+        fi
     fi
 }
 
@@ -428,22 +458,17 @@ CREATE_CONF_FILE() {
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
 
-    EXTERNALIP="${PUBIPADDRESS}:${PORTA}"
+    EXTERNALIP="${PUBIPADDRESS}:${PORT_TCP}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
-    # :${PORTB}"
 
     PRIV_KEY="gridnodeprivkey=${GN_KEY}"
     NODE_NAME="gridnode=1"
-
     touch "${HOME}/${CONF}"
     cat <<COIN_CONF | sudo tee "${HOME}/${CONF}" >/dev/null
 rpcuser=${NEW_SERVER_NAME}_rpc
 rpcpassword=${PWA}
-rpcbind=0.0.0.0
-rpcallowip=0.0.0.0/0
-rpcport=${PORTB}
-port=${PORTA}
+port=${PORT_TCP}
 externalip=${EXTERNALIP}
 maxconnections=250
 server=1
@@ -454,13 +479,24 @@ bind=${BIND}
 ${PRIV_KEY}
 ${NODE_NAME}
 COIN_CONF
-    #cat "${HOME}/${CONF}"
     echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
+}
+
+CREATE_PORT_TXT() {
+    touch "${HOME}/${PORT_TXT}"
+    cat <<PORT_TXT | sudo tee "${HOME}/${PORT_TXT}" >/dev/null
+${PORT_UDP}
+PORT_TXT
+    echo "Copying ${PORT_TXT} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${PORT_TXT}"
+    sync
+    docker cp "${HOME}/${PORT_TXT}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${PORT_TXT}"
+    sync
+    rm -f "${HOME}/${PORT_TXT}"
 }
 
 INSTALL_HELPER() {
@@ -528,6 +564,7 @@ INSTALL_COMPLETE() {
     ASCII_ART
     echo
     CREATE_CONF_FILE
+    CREATE_PORT_TXT
     sleep 0.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
