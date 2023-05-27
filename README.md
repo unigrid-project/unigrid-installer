@@ -23,3 +23,9 @@ The old installer was adding masternodeprivkey and masternode to the conf file. 
 ```
 bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/fixconfs.sh)" ; source ~/.bashrc
 ```
+
+To fix the docker containers not having UDP ports needed for hedgehog, this script adds those ports.
+
+```
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/scripts/fix_udp.sh)" ; source ~/.bashrc
+```
