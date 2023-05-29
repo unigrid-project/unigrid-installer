@@ -395,6 +395,11 @@ INSTALL_NEW_NODE() {
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
     sync
+    # setup conf file before we run the container
+    CREATE_CONF_FILE
+    sleep 0.5
+    CREATE_PORT_TXT
+    sleep 0.5
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
@@ -448,7 +453,7 @@ INSTALL_WATCHTOWER() {
 CREATE_CONF_FILE() {
     sleep 2
     # make sure the new container is stopped before adding the updated conf file
-    docker stop $NEW_SERVER_NAME
+    # docker stop $NEW_SERVER_NAME
     echo -e "Generating the unigrid.conf file"
     # Generate random password.
     if ! [ -x "$(command -v pwgen)" ]; then
@@ -483,10 +488,9 @@ ${PRIV_KEY}
 ${NODE_NAME}
 COIN_CONF
     echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
-    sync
+    sleep 0.5
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
-    sync
-    echo "unigrid.con: ${HOME}/${CONF}"
+    sleep 0.5
     COMPARE_CONF_FILES "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
@@ -511,10 +515,10 @@ COMPARE_CONF_FILES() {
     fi
 
     # Print the contents of both files
-    echo "Contents of ${1}:"
-    cat "${1}"
-    echo "Contents of ${2}:"
-    cat "./${2##*/}_temp"
+    # echo "Contents of ${1}:"
+    # cat "${1}"
+    # echo "Contents of ${2}:"
+    # cat "./${2##*/}_temp"
 
     # Remove the temporary file
     rm "./${2##*/}_temp"
@@ -591,15 +595,11 @@ CHECK_OTHER_CONFS() {
 }
 
 INSTALL_COMPLETE() {
-    CHECK_OTHER_CONFS
+    
     CURRENT_CONTAINER_ID=$(echo $(docker ps -aqf name="${NEW_SERVER_NAME}"))
 
     ASCII_ART
     echo
-    CREATE_CONF_FILE
-    sleep 0.5
-    CREATE_PORT_TXT
-    sleep 0.5
     echo
     echo -e "${GREEN}Starting Unigrid docker container: ${CURRENT_CONTAINER_ID}"
     echo
@@ -758,6 +758,8 @@ START_INSTALL() {
 
     INSTALL_WATCHTOWER
 
+    CHECK_OTHER_CONFS
+    sleep 0.5
     INSTALL_COMPLETE
 
     rm -f ~/___gn.sh install.sh
