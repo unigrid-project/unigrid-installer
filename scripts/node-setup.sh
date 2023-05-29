@@ -486,9 +486,21 @@ COIN_CONF
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
     echo "unigrid.con: ${HOME}/${CONF}"
+    COMPARE_CONF_FILES "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
+
+COMPARE_CONF_FILES() {
+  diff -q "${1}" "${2}" > /dev/null
+  if [ $? -eq 0 ]
+  then
+    echo "The configuration files are the same."
+  else
+    echo "The configuration files are different."
+  fi
+}
+
 
 CREATE_PORT_TXT() {
     touch "${HOME}/${PORT_TXT}"
