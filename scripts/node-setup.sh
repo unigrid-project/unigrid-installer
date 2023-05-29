@@ -606,7 +606,8 @@ CHECK_CONF_FILE() {
         if [ $RECURSION_COUNTER -lt 5 ]; then
             RECURSION_COUNTER=$((RECURSION_COUNTER + 1))
             docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
-            echo -e "Restarting the Docker container..."
+            docker exec "${NEW_SERVER_NAME}" chown root:root "${USR_HOME}/${DIRECTORY}/${CONF}"
+            echo -e "Restarting the Docker container after conf file copy..."
             docker restart "${NEW_SERVER_NAME}"
         else
             echo -e "Maximum number of attempts reached."
