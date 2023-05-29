@@ -19,6 +19,7 @@ fi
 EXPLORER_URL='http://explorer.unigrid.org/'
 EXPLORER_RAWTRANSACTION_PATH='api/getrawtransaction?txid='
 PATH_SUFFIX='&decrypt=1'
+RECURSION_COUNTER=0
 COLLATERAL=3000
 COLLATERAL_NEW=2000
 SSL_BYPASS=''
@@ -181,9 +182,9 @@ GET_TXID() {
                 TXHASH=''
                 continue
             else
-                URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
-                OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
-                echo -e "${CYAN}Checking the explorer for txid ${URL}"
+                # URL=$(echo "${EXPLORER_URL}${EXPLORER_RAWTRANSACTION_PATH}${TX_DETAILS[0]}${PATH_SUFFIX}" | tr -d '[:space:]')
+                # OUTPUTIDX_RAW=$(wget -4qO- -T 15 -t 2 -o- "${URL}" "${SSL_BYPASS}")
+                # echo -e "${CYAN}Checking the explorer for txid ${URL}"
                 #echo -e "${OUTPUTIDX_RAW}"
                 # OUTPUTIDX_WEB=$(echo "${OUTPUTIDX_RAW}" | tr '[:upper:]' '[:lower:]' | jq ".vout[${TX_DETAILS[1]}] | select( (.value)|tonumber == ${COLLATERAL} ) | .n" 2>/dev/null)
                 # echo -e "output from txid in explorer: ${OUTPUTIDX_WEB}"
@@ -487,6 +488,7 @@ COIN_CONF
     echo "Copying ${CONF} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     sleep 0.5
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
+    docker exec "${NEW_SERVER_NAME}" chown root:root "${USR_HOME}/${DIRECTORY}/${CONF}"
     sleep 0.5
     COMPARE_CONF_FILES "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
@@ -496,7 +498,7 @@ COIN_CONF
 COMPARE_CONF_FILES() {
     # Copy the file from the Docker container to a temporary file on your local system
     docker cp "${2}" "./${2##*/}_temp"
-
+ 
     # Compare the local file with the temporary file
     diff -q "${1}" "./${2##*/}_temp" >/dev/null
     if [ $? -eq 0 ]; then
@@ -516,7 +518,7 @@ COMPARE_CONF_FILES() {
     # cat "${1}"
     # echo "Contents of ${2}:"
     # cat "./${2##*/}_temp"
-
+    RECURSION_COUNTER=0
     # Remove the temporary file
     rm "./${2##*/}_temp"
 }
@@ -529,6 +531,7 @@ PORT_TXT
     echo "Copying ${PORT_TXT} to ${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${PORT_TXT}"
     sync
     docker cp "${HOME}/${PORT_TXT}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${PORT_TXT}"
+    docker exec "${NEW_SERVER_NAME}" chown root:root "${USR_HOME}/${DIRECTORY}/${PORT_TXT}"
     sync
     rm -f "${HOME}/${PORT_TXT}"
 }
@@ -593,7 +596,7 @@ CHECK_OTHER_CONFS() {
 
 CHECK_CONF_FILE() {
     docker cp "${2}" "./${2##*/}_temp"
-
+    
     # Compare the local file with the temporary file
     diff -q "${1}" "./${2##*/}_temp" >/dev/null
     if [ $? -eq 0 ]; then
@@ -609,7 +612,7 @@ CHECK_CONF_FILE() {
             echo -e "Maximum number of attempts reached."
         fi
     fi
-
+    RECURSION_COUNTER=0
     rm "./${2##*/}_temp"
     rm -f "${HOME}/${CONF}"
 }
