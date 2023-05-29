@@ -609,6 +609,8 @@ CHECK_CONF_FILE() {
             docker exec "${NEW_SERVER_NAME}" chown root:root "${USR_HOME}/${DIRECTORY}/${CONF}"
             echo -e "Restarting the Docker container after conf file copy..."
             docker restart "${NEW_SERVER_NAME}"
+            sleep 5
+            CHECK_CONF_FILE "${1}" "${2}"
         else
             echo -e "Maximum number of attempts reached."
         fi
