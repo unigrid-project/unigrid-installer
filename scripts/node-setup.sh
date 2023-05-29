@@ -604,13 +604,7 @@ INSTALL_COMPLETE() {
     # Add commands to .bash_aliases
     BASH_ALIASES="$HOME/.bash_aliases"
     SINGLE_QUOTE="'"
-    # setup conf file
-    sleep 2
-    CREATE_CONF_FILE
-    sleep 2
-    CREATE_PORT_TXT
-    sleep 2
-    sync
+
     if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
         TESTNET="-${IMAGE_SOURCE}"
     else
@@ -635,6 +629,13 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Checking the status of the new gridnode."
     #RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
     #echo "$RESTART_SERVICE"
+    # setup conf file
+    sleep 2
+    CREATE_CONF_FILE
+    sleep 2
+    CREATE_PORT_TXT
+    sleep 2
+    sync
     docker restart "${CURRENT_CONTAINER_ID}"
 
     # we only need to do this for the first node as the rest copy this nodes volume
