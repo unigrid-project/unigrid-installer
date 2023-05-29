@@ -396,10 +396,12 @@ INSTALL_NEW_NODE() {
         alpine ash -c "cd /from ; cp -av . /to"
     sync
     # setup conf file before we run the container
+    sleep 2
     CREATE_CONF_FILE
-    sleep 0.5
+    sleep 2
     CREATE_PORT_TXT
-    sleep 0.5
+    sleep 2
+    sync
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
@@ -706,11 +708,11 @@ INSTALL_COMPLETE() {
         fi
         if [ $COUNTER -eq 120 ]; then
             echo
-            echo "${RED}Something went wrong."
-            echo "${BLUE}Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
-            echo "${BLUE}If the block count is very low, you can try running this command to resync the chain."
-            echo "${BLUE}This will remove the chain data in that container only and let it resync from the bootstrap."
-            echo "${ORANGE}unigrid resync-node ${NEW_SERVER_NAME}${NC}"
+            echo -e "${RED}Something went wrong."
+            echo -e "${BLUE}Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
+            echo -e "${BLUE}If the block count is very low, you can try running this command to resync the chain."
+            echo -e "${BLUE}This will remove the chain data in that container only and let it resync from the bootstrap."
+            echo -e "${ORANGE}unigrid resync-node ${NEW_SERVER_NAME}${NC}"
             echo
             exit 1
         fi
