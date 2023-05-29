@@ -638,7 +638,7 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Checking the status of the new gridnode."
     #RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
     #echo "$RESTART_SERVICE"
-    #docker start "${CURRENT_CONTAINER_ID}"
+    docker restart "${CURRENT_CONTAINER_ID}"
 
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
@@ -760,7 +760,7 @@ START_INSTALL() {
 
     INSTALL_WATCHTOWER
 
-    CHECK_OTHER_CONFS
+    #CHECK_OTHER_CONFS
     sleep 0.5
     INSTALL_COMPLETE
 
