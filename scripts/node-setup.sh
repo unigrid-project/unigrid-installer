@@ -632,10 +632,10 @@ INSTALL_COMPLETE() {
     # setup conf file
     sleep 2
     CREATE_CONF_FILE
-    sleep 2
-    CREATE_PORT_TXT
-    sleep 2
     sync
+    # CREATE_PORT_TXT
+    # sleep 2
+    # sync
     docker restart "${CURRENT_CONTAINER_ID}"
 
     # we only need to do this for the first node as the rest copy this nodes volume
