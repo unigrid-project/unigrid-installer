@@ -446,6 +446,8 @@ INSTALL_WATCHTOWER() {
 }
 
 CREATE_CONF_FILE() {
+    # make sure the new container is stopped before adding the updated conf file
+    docker stop $NEW_SERVER_NAME
     echo -e "Generating the unigrid.conf file"
     # Generate random password.
     if ! [ -x "$(command -v pwgen)" ]; then
@@ -453,11 +455,11 @@ CREATE_CONF_FILE() {
     else
         PWA="$(pwgen -1 -s 44)"
     fi
-    echo - "generated rpc password: ${PWA}"ugd_docker_1 getblockcount
+    echo - "generated rpc password: ${PWA}"
     PUBIPADDRESS=$(dig +short txt ch whoami.cloudflare @1.0.0.1)
     PUBIPADDRESS=$(echo "$PUBIPADDRESS" | tr -d '"')
     echo -e "Public IP Address: ${PUBIPADDRESS}"
-
+    echo -e "rpcuser: ${NEW_SERVER_NAME}_rpc"
     EXTERNALIP="${PUBIPADDRESS}:${PORT_TCP}"
     echo -e "EXTERNALIP: ${EXTERNALIP}"
     BIND="0.0.0.0"
