@@ -405,13 +405,6 @@ INSTALL_NEW_NODE() {
         unigrid/unigrid:"${IMAGE_SOURCE}"
     sleep 0.1
     sync
-    # setup conf file before we run the container
-    sleep 2
-    CREATE_CONF_FILE
-    sleep 2
-    CREATE_PORT_TXT
-    sleep 2
-    sync
 }
 
 SET_RANDOM_UPDATE_TIME() {
@@ -597,9 +590,7 @@ CHECK_OTHER_CONFS() {
 }
 
 INSTALL_COMPLETE() {
-    
     CURRENT_CONTAINER_ID=$(echo $(docker ps -aqf name="${NEW_SERVER_NAME}"))
-
     ASCII_ART
     echo
     echo
@@ -613,7 +604,13 @@ INSTALL_COMPLETE() {
     # Add commands to .bash_aliases
     BASH_ALIASES="$HOME/.bash_aliases"
     SINGLE_QUOTE="'"
-
+    # setup conf file
+    sleep 2
+    CREATE_CONF_FILE
+    sleep 2
+    CREATE_PORT_TXT
+    sleep 2
+    sync
     if [[ "${IMAGE_SOURCE}" = "testnet" ]]; then
         TESTNET="-${IMAGE_SOURCE}"
     else
