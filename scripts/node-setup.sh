@@ -601,6 +601,7 @@ CHECK_CONF_FILE() {
     diff -q "${1}" "./${2##*/}_temp" >/dev/null
     if [ $? -eq 0 ]; then
         echo -e "The configuration files are the same."
+        rm "./${2##*/}_temp"
     else
         echo -e "The configuration files are different."
         if [ $RECURSION_COUNTER -lt 5 ]; then
@@ -610,13 +611,14 @@ CHECK_CONF_FILE() {
             echo -e "Restarting the Docker container after conf file copy..."
             docker restart "${NEW_SERVER_NAME}"
             sleep 5
+            rm "./${2##*/}_temp"
             CHECK_CONF_FILE "${1}" "${2}"
         else
             echo -e "Maximum number of attempts reached."
+            rm "./${2##*/}_temp"
         fi
     fi
     RECURSION_COUNTER=0
-    rm "./${2##*/}_temp"
     rm -f "${HOME}/${CONF}"
 }
 
