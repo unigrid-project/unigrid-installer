@@ -446,6 +446,7 @@ INSTALL_WATCHTOWER() {
 }
 
 CREATE_CONF_FILE() {
+    sleep 2
     # make sure the new container is stopped before adding the updated conf file
     docker stop $NEW_SERVER_NAME
     echo -e "Generating the unigrid.conf file"
@@ -492,28 +493,32 @@ COIN_CONF
 }
 
 COMPARE_CONF_FILES() {
-  # Copy the file from the Docker container to a temporary file on your local system
-  docker cp "${2}" "./${2##*/}_temp"
+    # Copy the file from the Docker container to a temporary file on your local system
+    docker cp "${2}" "./${2##*/}_temp"
 
-  # Compare the local file with the temporary file
-  diff -q "${1}" "./${2##*/}_temp" > /dev/null
-  if [ $? -eq 0 ]
-  then
-    echo "The configuration files are the same."
-  else
-    echo "The configuration files are different."
-  fi
+    # Compare the local file with the temporary file
+    diff -q "${1}" "./${2##*/}_temp" >/dev/null
+    if [ $? -eq 0 ]; then
+        echo "The configuration files are the same."
+    else
+        echo "The configuration files are different."
+        if [ $RECURSION_COUNTER -lt 5 ]; then
+            RECURSION_COUNTER=$((RECURSION_COUNTER + 1))
+            CREATE_CONF_FILE
+        else
+            echo "Maximum number of attempts reached."
+        fi
+    fi
 
-# Print the contents of both files
-  echo "Contents of ${1}:"
-  cat "${1}"
-  echo "Contents of ${2}:"
-  cat "./${2##*/}_temp"
+    # Print the contents of both files
+    echo "Contents of ${1}:"
+    cat "${1}"
+    echo "Contents of ${2}:"
+    cat "./${2##*/}_temp"
 
-  # Remove the temporary file
-  rm "./${2##*/}_temp"
+    # Remove the temporary file
+    rm "./${2##*/}_temp"
 }
-
 
 CREATE_PORT_TXT() {
     touch "${HOME}/${PORT_TXT}"
