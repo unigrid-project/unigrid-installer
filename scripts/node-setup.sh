@@ -725,14 +725,14 @@ INSTALL_COMPLETE() {
         sleep 1
         COUNTER=$((COUNTER + 1))
         BLOCK_COUNT=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service unigrid getblockcount 2>&1)
-        if [ $COUNTER -eq 60 ]; then
+        if [ $COUNTER -eq 100 ]; then
             echo
             echo "Restarting container and retrying..."
             docker restart "${CURRENT_CONTAINER_ID}"
             RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
             echo "$RESTART_SERVICE"
         fi
-        if [ $COUNTER -eq 120 ]; then
+        if [ $COUNTER -eq 160 ]; then
             echo
             echo -e "${RED}Something went wrong."
             echo -e "${BLUE}Try running 'docker restart ${NEW_SERVER_NAME}' and then check that the container is working by calling '${NEW_SERVER_NAME} getblockcount'"
