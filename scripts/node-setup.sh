@@ -504,6 +504,12 @@ COMPARE_CONF_FILES() {
     echo "The configuration files are different."
   fi
 
+# Print the contents of both files
+  echo "Contents of ${1}:"
+  cat "${1}"
+  echo "Contents of ${2}:"
+  cat "./${2##*/}_temp"
+
   # Remove the temporary file
   rm "./${2##*/}_temp"
 }
