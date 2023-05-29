@@ -666,7 +666,9 @@ INSTALL_COMPLETE() {
     sleep 2
     sync
     docker restart "${CURRENT_CONTAINER_ID}"
+    sleep 3
     CHECK_CONF_FILE "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
+    sleep 5
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
