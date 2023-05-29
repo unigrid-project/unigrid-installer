@@ -154,6 +154,13 @@ REMOVE_ALL() {
     rm -rf .bash_aliases gridnodes.txt
 }
 
+REMOVE_SINGLE() {
+    docker stop "${1}"
+    docker rm "${1}"
+    CONTAINER_NUMBER=$(echo ${1} | sed 's/[^0-9]*//g')
+    docker volume rm data_volume_"${CONTAINER_NUMBER}"
+}
+
 RESYNC_GRIDNODE() {
     local s=$1
     echo -e "${BLUE}Stopping service in: ${s}"
@@ -173,7 +180,7 @@ help)
     # show list of commands
     SHOW_ASCII
     echo
-    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all|resync-node <COMMAND>}${NC}"
+    echo -e "${BLUE}Usage: "${NAME}" {list|status|debug|restart-all|stop-all|start-all|get-blocks|remove-all|resync-node <COMMAND>|remove-single <COMMAND>}${NC}"
     echo
     exit 1
     ;;
@@ -223,6 +230,12 @@ remove-all)
     SHOW_ASCII
     echo
     REMOVE_ALL
+    echo
+    ;;
+remove-single)
+    SHOW_ASCII
+    echo
+    REMOVE_SINGLE "${2}"
     echo
     ;;
 resync-node)

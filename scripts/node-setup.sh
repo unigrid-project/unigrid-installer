@@ -485,6 +485,7 @@ COIN_CONF
     sync
     docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
     sync
+    echo "unigrid.con: ${HOME}/${CONF}"
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
     rm -f "${HOME}/${CONF}"
 }
