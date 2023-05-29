@@ -492,13 +492,20 @@ COIN_CONF
 }
 
 COMPARE_CONF_FILES() {
-  diff -q "${1}" "${2}" > /dev/null
+  # Copy the file from the Docker container to a temporary file on your local system
+  docker cp "${2}" "./${2##*/}_temp"
+
+  # Compare the local file with the temporary file
+  diff -q "${1}" "./${2##*/}_temp" > /dev/null
   if [ $? -eq 0 ]
   then
     echo "The configuration files are the same."
   else
     echo "The configuration files are different."
   fi
+
+  # Remove the temporary file
+  rm "./${2##*/}_temp"
 }
 
 
