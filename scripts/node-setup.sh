@@ -597,6 +597,7 @@ INSTALL_COMPLETE() {
     ASCII_ART
     echo
     CREATE_CONF_FILE
+    sleep 0.5
     CREATE_PORT_TXT
     sleep 0.5
     echo
@@ -635,7 +636,7 @@ INSTALL_COMPLETE() {
     echo -e "${CYAN}Restarting the gridnode with the updated configuration."
     #RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
     #echo "$RESTART_SERVICE"
-    docker restart "${CURRENT_CONTAINER_ID}"
+    docker start "${CURRENT_CONTAINER_ID}"
 
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
