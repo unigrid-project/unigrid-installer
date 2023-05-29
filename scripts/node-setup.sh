@@ -395,13 +395,6 @@ INSTALL_NEW_NODE() {
         -v ${DATA_VOLUME}${NODE_NUMBER}:/to \
         alpine ash -c "cd /from ; cp -av . /to"
     sync
-    # setup conf file before we run the container
-    sleep 2
-    CREATE_CONF_FILE
-    sleep 2
-    CREATE_PORT_TXT
-    sleep 2
-    sync
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
     docker run -it -d --name="${NEW_SERVER_NAME}" \
@@ -411,6 +404,13 @@ INSTALL_NEW_NODE() {
         --restart unless-stopped \
         unigrid/unigrid:"${IMAGE_SOURCE}"
     sleep 0.1
+    sync
+    # setup conf file before we run the container
+    sleep 2
+    CREATE_CONF_FILE
+    sleep 2
+    CREATE_PORT_TXT
+    sleep 2
     sync
 }
 
