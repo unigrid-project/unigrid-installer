@@ -387,6 +387,7 @@ INSTALL_NEW_NODE() {
     echo "Copy Volume and run"
     # Pause a container
     docker pause ${BASE_NAME}1
+    sync
     docker run --rm \
         -i \
         -d \
@@ -397,6 +398,7 @@ INSTALL_NEW_NODE() {
     sync
     echo "Done copying volume"
     docker unpause ${BASE_NAME}1
+    sync
     docker run -it -d --name="${NEW_SERVER_NAME}" \
         -p "${PORT_UDP}:${PORT_UDP}/udp" \
         -p "${PORT_TCP}:${PORT_TCP}" \
@@ -488,7 +490,7 @@ COIN_CONF
     sleep 0.5
     COMPARE_CONF_FILES "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     #docker exec "${CURRENT_CONTAINER_ID}" cat "${USR_HOME}/${DIRECTORY}/${CONF}"
-    rm -f "${HOME}/${CONF}"
+    # rm -f "${HOME}/${CONF}"
 }
 
 COMPARE_CONF_FILES() {
@@ -589,6 +591,29 @@ CHECK_OTHER_CONFS() {
     done
 }
 
+CHECK_CONF_FILE() {
+    docker cp "${2}" "./${2##*/}_temp"
+
+    # Compare the local file with the temporary file
+    diff -q "${1}" "./${2##*/}_temp" >/dev/null
+    if [ $? -eq 0 ]; then
+        echo -e "The configuration files are the same."
+    else
+        echo -e "The configuration files are different."
+        if [ $RECURSION_COUNTER -lt 5 ]; then
+            RECURSION_COUNTER=$((RECURSION_COUNTER + 1))
+            docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
+            echo -e "Restarting the Docker container..."
+            docker restart "${NEW_SERVER_NAME}"
+        else
+            echo -e "Maximum number of attempts reached."
+        fi
+    fi
+
+    rm "./${2##*/}_temp"
+    rm -f "${HOME}/${CONF}"
+}
+
 INSTALL_COMPLETE() {
     CURRENT_CONTAINER_ID=$(echo $(docker ps -aqf name="${NEW_SERVER_NAME}"))
     ASCII_ART
@@ -632,12 +657,12 @@ INSTALL_COMPLETE() {
     # setup conf file
     sleep 2
     CREATE_CONF_FILE
+    sleep 2
+    CREATE_PORT_TXT
+    sleep 2
     sync
-    # CREATE_PORT_TXT
-    # sleep 2
-    # sync
     docker restart "${CURRENT_CONTAINER_ID}"
-
+    CHECK_CONF_FILE "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
     # we only need to do this for the first node as the rest copy this nodes volume
     if [ "${NEW_SERVER_NAME}" = 'ugd_docker_1' ]; then
         echo -e "Clean volume install for ${NEW_SERVER_NAME}"
