@@ -620,12 +620,7 @@ INSTALL_COMPLETE() {
     fi
     # Add helper commands to /usr/bin
     INSTALL_HELPER
-    # Add gridnode details to a txt file
-    FILENAME='gridnodes.txt'
-    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
-    if [ "$OUTPUT" != "" ]; then
-        echo $OUTPUT >>~/$FILENAME
-    fi
+
     echo -e "${CYAN}Checking the status of the new gridnode."
     #RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
     #echo "$RESTART_SERVICE"
@@ -633,6 +628,13 @@ INSTALL_COMPLETE() {
     sleep 2
     CREATE_CONF_FILE
     sleep 2
+    # Add gridnode details to a txt file
+    FILENAME='gridnodes.txt'
+    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    if [ "$OUTPUT" != "" ]; then
+        echo $OUTPUT >>~/$FILENAME
+    fi
+    sync
     CREATE_PORT_TXT
     sleep 2
     sync
