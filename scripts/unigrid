@@ -69,6 +69,13 @@ GET_BLOCKS() {
     done
 }
 
+GET_NODE_LIST() {
+    # Run the command and store the output
+    output=$( docker exec -i "${1}" /usr/local/bin/hedgehog.bin cli node-list)
+    # Use grep to extract the addresses
+    echo "$output" | grep -oP 'address=[^\,]*'
+}
+
 GET_LIST() {
     echo -e "${BLUE}Gridnode container list"
     docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.ID}}"
@@ -237,6 +244,11 @@ remove-single)
     echo
     REMOVE_SINGLE "${2}"
     echo
+    ;;
+node)
+    echo -e "Checking the node-list for: ${2}"
+    GET_NODE_LIST "${2}"
+    echo 
     ;;
 resync-node)
     if [[ -z "$2" ]]; then
