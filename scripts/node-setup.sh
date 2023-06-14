@@ -498,7 +498,7 @@ COIN_CONF
 COMPARE_CONF_FILES() {
     # Copy the file from the Docker container to a temporary file on your local system
     docker cp "${2}" "./${2##*/}_temp"
- 
+
     # Compare the local file with the temporary file
     diff -q "${1}" "./${2##*/}_temp" >/dev/null
     if [ $? -eq 0 ]; then
@@ -596,7 +596,7 @@ CHECK_OTHER_CONFS() {
 
 CHECK_CONF_FILE() {
     docker cp "${2}" "./${2##*/}_temp"
-    
+
     # Compare the local file with the temporary file
     diff -q "${1}" "./${2##*/}_temp" >/dev/null
     if [ $? -eq 0 ]; then
@@ -609,6 +609,7 @@ CHECK_CONF_FILE() {
             docker cp "${HOME}/${CONF}" "${NEW_SERVER_NAME}":"${USR_HOME}/${DIRECTORY}/${CONF}"
             docker exec "${NEW_SERVER_NAME}" chown root:root "${USR_HOME}/${DIRECTORY}/${CONF}"
             echo -e "Restarting the Docker container after conf file copy..."
+
             docker restart "${NEW_SERVER_NAME}"
             sleep 5
             rm "./${2##*/}_temp"
@@ -653,12 +654,7 @@ INSTALL_COMPLETE() {
     fi
     # Add helper commands to /usr/bin
     INSTALL_HELPER
-    # Add gridnode details to a txt file
-    FILENAME='gridnodes.txt'
-    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
-    if [ "$OUTPUT" != "" ]; then
-        echo $OUTPUT >>~/$FILENAME
-    fi
+
     echo -e "${CYAN}Checking the status of the new gridnode."
     #RESTART_SERVICE=$(docker exec -i "${CURRENT_CONTAINER_ID}" ugd_service restart)
     #echo "$RESTART_SERVICE"
@@ -669,6 +665,12 @@ INSTALL_COMPLETE() {
     CREATE_PORT_TXT
     sleep 2
     sync
+    # Add gridnode details to a txt file
+    FILENAME='gridnodes.txt'
+    OUTPUT="${NEW_SERVER_NAME} ${EXTERNALIP} ${GN_KEY} ${TX_DETAILS[0]} ${TX_DETAILS[1]}"
+    if [ "$OUTPUT" != "" ]; then
+        echo $OUTPUT >>~/$FILENAME
+    fi
     docker restart "${CURRENT_CONTAINER_ID}"
     sleep 3
     CHECK_CONF_FILE "${HOME}/${CONF}" "${NEW_SERVER_NAME}:${USR_HOME}/${DIRECTORY}/${CONF}"
