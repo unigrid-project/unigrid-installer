@@ -221,9 +221,19 @@ FIND_FREE_UDP_PORT() {
     # Define the range of ports to check
     LOWERPORT=32769
     UPPERPORT=60998
+    DEFAULT_PORT=52883
 
     # Extract the list of used ports from the UFW rules
     USED_PORTS=$(sudo ufw status verbose | grep '/udp' | awk '{print $1}' | cut -d '/' -f1)
+
+    # Check if the default port is in the list of used ports
+    if ! echo "${USED_PORTS}" | grep -q "^${DEFAULT_PORT}$"; then
+        # If the default port is not in the list of used ports, add it to UFW rules
+        sudo ufw allow "${DEFAULT_PORT}"/udp >/dev/null
+        # Print the port number and return
+        echo "${DEFAULT_PORT}"
+        return
+    fi
 
     # Loop until we find an unused port
     while :; do
