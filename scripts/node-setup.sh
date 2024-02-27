@@ -397,7 +397,7 @@ INSTALL_NEW_NODE() {
 
     echo "Copy Volume and run"
     # Pause a container
-    docker pause ${BASE_NAME}1
+    #docker pause ${BASE_NAME}1
     sync
     docker run --rm \
         -i \
@@ -408,7 +408,7 @@ INSTALL_NEW_NODE() {
         alpine ash -c "cd /from ; cp -av . /to"
     sync
     echo "Done copying volume"
-    docker unpause ${BASE_NAME}1
+    #docker unpause ${BASE_NAME}1
     sync
     docker run -it -d --name="${NEW_SERVER_NAME}" \
         -p "${PORT_UDP}:${PORT_UDP}/udp" \
